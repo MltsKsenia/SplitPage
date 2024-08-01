@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let expenseIdCounter = 1;
 
     const groupList = document.getElementById('group-list');
-    const expenseList = document.getElementById('expense-list');
     const groupSelect = document.getElementById('group-select');
 
     document.getElementById('add-group-btn').addEventListener('click', addGroup);
@@ -14,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function addGroup() {
         const groupName = prompt('Enter group name:');
         if (groupName) {
-            const group = { id: groupIdCounter++, name: groupName, members: [] };
+            const group = { id: groupIdCounter++, name: groupName, members: [], expenses: [] };
             groups.push(group);
             renderGroups();
             renderGroupOptions();
@@ -27,9 +26,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const amount = parseFloat(document.getElementById('expense-amount').value);
 
         if (groupId && description && amount) {
-            const expense = { id: expenseIdCounter++, groupId, description, amount, date: new Date() };
-            expenses.push(expense);
-            renderExpenses();
+            const expense = { id: expenseIdCounter++, description, amount, date: new Date() };
+            const group = groups.find(g => g.id === groupId);
+            if (group) {
+                group.expenses.push(expense);
+                renderExpenses(groupId);
+            }
         } else {
             alert('Please fill in all fields.');
         }
@@ -41,10 +43,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const li = document.createElement('li');
             li.textContent = group.name;
             li.addEventListener('click', () => {
-                const memberName = prompt('Enter member name:');
-                if (memberName) {
-                    group.members.push(memberName);
-                    alert(`Added ${memberName} to ${group.name}`);
+                const expensesContainer = document.createElement('div');
+                expensesContainer.classList.add('expenses-container');
+                if (li.nextElementSibling && li.nextElementSibling.classList.contains('expenses-container')) {
+                    li.nextElementSibling.remove();
+                } else {
+                    renderExpenses(group.id, expensesContainer);
+                    li.after(expensesContainer);
                 }
             });
             groupList.appendChild(li);
@@ -61,17 +66,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function renderExpenses() {
-        expenseList.innerHTML = '';
-        expenses.forEach(expense => {
-            const group = groups.find(group => group.id === expense.groupId);
-            const li = document.createElement('li');
-            li.innerHTML = `
-                <strong>${expense.description}</strong> - $${expense.amount.toFixed(2)}
-                <br>Group: ${group.name}
-                <br>Date: ${expense.date.toLocaleDateString()}
-            `;
-            expenseList.appendChild(li);
-        });
+    function renderExpenses(groupId, container) {
+        const group = groups.find(g => g.id === groupId);
+        if (group) {
+            container.innerHTML = '';
+            group.expenses.forEach(expense => {
+                const expenseItem = document.createElement('div');
+                expenseItem.innerHTML = `
+                    <strong>${expense.description}</strong> - $${expense.amount.toFixed(2)}
+                    <br>Date: ${expense.date.toLocaleDateString()}
+                `;
+                container.appendChild(expenseItem);
+            });
+        }
     }
 });
