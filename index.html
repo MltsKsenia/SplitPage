@@ -1,1 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SplitPage</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header>
+        <h1>SpliPage</h1>
+    </header>
+    <main>
+        <section id="groups">
+            <h2>Groups</h2>
+            <ul id="group-list"></ul>
+            <button id="add-group-btn">Add Group</button>
+        </section>
+        <section id="expenses">
+            <h2>Expenses</h2>
+            <div id="expense-form">
+                <select id="group-select"></select>
+                <input type="text" id="expense-description" placeholder="Description">
+                <input type="number" id="expense-amount" placeholder="Amount">
+                <button id="add-expense-btn">Add Expense</button>
+            </div>
+            <ul id="expense-list"></ul>
+        </section>
+    </main>
+    <script src="script.js"></script>
+</body>
+
+</html>
