@@ -1,72 +1,106 @@
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
+.quicksand {
+    font-family: "Quicksand", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 300;
+    font-style: normal;
 }
 
-header {
-    background-color: #4CAF50;
-    color: white;
+html,
+body {
+    background: linear-gradient(to bottom, #6dac95, #095b4d);
+    width: auto;
+    height: 99vh;
+    font-family: quicksand;
     text-align: center;
-    padding: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-size: 1em;
 }
 
 main {
+    width: 90%;
+    height: auto;
     display: flex;
-    justify-content: space-around;
-    padding: 2rem;
+    justify-content: center;
+    flex-flow: row nowrap;
 }
 
-section {
-    width: 45%;
+.container {
+    background-color: #fff;
+    padding: 20px;
+    margin: 2.5%;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-width: 100%;
+    width: 100%;
 }
 
-h2 {
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 0.5rem;
+.container h2 {
+    margin-bottom: 20px;
+    text-align: center;
 }
 
-ul {
-    list-style: none;
-    padding: 0;
+.container label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
 }
 
-li {
-    border: 1px solid #ddd;
-    margin: 0.5rem 0;
-    padding: 0.5rem;
-    border-radius: 5px;
-    cursor: pointer;
-}
 
-button {
-    background-color: #4CAF50;
-    color: white;
+.container button {
+    width: 100%;
+    padding: 10px;
+    margin: 5px;
+    background-color: #095b4d;
     border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 16px;
     cursor: pointer;
 }
 
-button:hover {
-    background-color: #45a049;
+.container button:hover {
+    background-color: #6dac95;
 }
 
-#expense-form {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+.container button:active {
+    background-color: #095b4d;
 }
 
 #expense-form input,
 #expense-form select,
 #expense-form button {
-    width: 100%;
+    width: 90%;
     padding: 0.5rem;
     border-radius: 5px;
     border: 1px solid #ddd;
+    margin: 2px;
 }
 
 .hidden {
     display: none;
+}
+
+ul li {
+    list-style: none;
+    text-align: center;
+}
+
+.expense {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+}
+
+.hidden {
+    display: none;
+}
+
+.expense-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
