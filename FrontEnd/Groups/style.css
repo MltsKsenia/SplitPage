@@ -1,0 +1,83 @@
+.quicksand {
+    font-family: "Quicksand", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 300;
+    font-style: normal;
+}
+
+html,
+body {
+    background: linear-gradient(to bottom, #6dac95, #095b4d);
+    width: auto;
+    height: 99vh;
+    font-family: quicksand;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-size: 1em;
+}
+
+.container {
+    width: 80%;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+h1 {
+    text-align: center;
+}
+
+#addGroupBtn {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    padding: 10px;
+    margin: 5px 0;
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+li:hover {
+    background-color: #6dac95;
+}
+
+li:active {
+    background-color: #095b4d;
+}
+
+button {
+    width: 90%;
+    padding: 10px;
+    margin: 5px;
+    background-color: #095b4d;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    font-size: medium;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #6dac95;
+}
+
+.container button:active {
+    background-color: #095b4d;
+}
