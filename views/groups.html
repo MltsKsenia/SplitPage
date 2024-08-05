@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Split Page: Groups</title>
+    <link rel="stylesheet" href="../public/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@500;700&family=Quicksand:wght@300..700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <h2>Create Group</h2>
+
+        <form id="create-group-form">
+            <label for="group-name">Group Name</label>
+            <input type="text" id="group-name" name="group-name" required>
+            <label for="group-members">Group Members (comma-separated emails)</label>
+            <input type="text" id="group-members" name="group-members" required>
+            <button type="submit">Create Group</button>
+        </form>
+    </div>
+    <div class="container">
+        <h2>Add Expense</h2>
+        <form id="add-expense-form">
+            <label for="group-id">Group ID</label>
+            <input type="text" id="group-id" name="group-id" required>
+            <label for="expense-amount">Expense Amount</label>
+            <input type="number" id="expense-amount" name="expense-amount" required>
+            <button type="submit">Add Expense</button>
+        </form>
+    </div>
+    <script src="../public/js/main.js"></script>
+</body>
+
+</html>
