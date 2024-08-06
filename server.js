@@ -13,20 +13,18 @@ const User = require('./models/user');
 const Group = require('./models/group');
 const Expense = require('./models/expense');
 
-const indexRoutes = require('./routes/index');
-const profileRoutes = require('./routes/profile');
 const groupsRoutes = require('./routes/groups');
-const registerRoutes = require('./routes/register');
 const expenseRoutes = require('./routes/expenses');
+const userRoutes = require('./routes/user');
+
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRoutes);
-app.use('/register', registerRoutes);
-app.use('/groups', groupsRoutes);
-app.use('/profile', profileRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/groups', groupRoutes);
+app.use('/api/expenses', expenseRoutes);
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
