@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Split Page: Groups</title>
-    <link rel="stylesheet" href="../public/css/style.css">
+    <link rel="stylesheet" href="../public/css/groups.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,27 +16,46 @@
 
 <body>
     <div class="container">
-        <h2>Create Group</h2>
+        <div class="sidebar">
+            <div class="header">
+                <h2>Groups</h2>
+                <button id="deleteGroupBtn">-</button>
+                <button id="addGroupBtn">+</button>
+            </div>
+            <ul id="groupList">
+            </ul>
+        </div>
+        <div class="content">
+            <h2 id="selectedGroupName">Select a group</h2>
+            <div class="navigate">
+                <button id="addExpenseBtn">Add Expenses</button>
+                <button id="deleteExpenseBtn">Delete</button>
+            </div>
+            <ul id="expenseList">
+            </ul>
+        </div>
+    </div>
 
-        <form id="create-group-form">
-            <label for="group-name">Group Name</label>
-            <input type="text" id="group-name" name="group-name" required>
-            <label for="group-members">Group Members (comma-separated emails)</label>
-            <input type="text" id="group-members" name="group-members" required>
-            <button type="submit">Create Group</button>
-        </form>
+    <div id="create-group-modal">
+        <h3>Create New Group</h3>
+        <input type="text" id="groupNameInput" placeholder="Group Name">
+        <input type="email" id="groupEmailInput" placeholder="Email">
+        <div>
+            <button onclick="createGroup()">Create</button>
+            <button onclick="hideCreateGroupModal()">Cancel</button>
+        </div>
     </div>
-    <div class="container">
-        <h2>Add Expense</h2>
-        <form id="add-expense-form">
-            <label for="group-id">Group ID</label>
-            <input type="text" id="group-id" name="group-id" required>
-            <label for="expense-amount">Expense Amount</label>
-            <input type="number" id="expense-amount" name="expense-amount" required>
-            <button type="submit">Add Expense</button>
-        </form>
+
+    <div id="add-expense-modal">
+        <h3>Add Expense</h3>
+        <input type="text" id="expenseName" placeholder="Expense name">
+        <input type="number" id="amount" placeholder="Amount">
+        <div>
+            <button onclick="createExpense()">Add</button>
+            <button onclick="hideCreateModal()">Cancel</button>
+        </div>
     </div>
-    <script src="../public/js/main.js"></script>
+    <script src="../public/js/groups.js"></script>
 </body>
 
 </html>

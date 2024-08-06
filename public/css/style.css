@@ -81,32 +81,3 @@ button {
 h1 {
     text-align: center;
 }
-
-#addGroupBtn {
-    display: block;
-    margin: 20px auto;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-}
-
-ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-li {
-    padding: 10px;
-    margin: 5px 0;
-    background-color: #e0e0e0;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-li:hover {
-    background-color: #6dac95;
-}
-
-li:active {
-    background-color: #095b4d;
-}

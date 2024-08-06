@@ -1,0 +1,164 @@
+.quicksand {
+    font-family: "Quicksand", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 300;
+    font-style: normal;
+}
+
+html,
+body {
+    background: linear-gradient(to bottom, #6dac95, #095b4d);
+    width: auto;
+    height: 99vh;
+    font-family: quicksand;
+    font-size: medium;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 50vw;
+    min-height: 50vh;
+    height: auto;
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+}
+
+.sidebar {
+    border-right: 1px solid #ccc;
+    padding: 10px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#groupList {
+    list-style-type: none;
+    padding: 0;
+}
+
+#groupList li {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+    cursor: pointer;
+}
+
+#groupList li:hover {
+    background-color: #6dac95;
+}
+
+#groupList li:active {
+    background-color: #095b4d;
+}
+
+.content {
+    padding: 10px;
+}
+
+#expenseList {
+    list-style-type: none;
+    padding: 0;
+}
+
+#expenseList li {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+button {
+    background-color: #6dac95;
+    margin: 2px;
+}
+
+button:hover {
+    background-color: #095b4d;
+}
+
+button:active {
+    background-color: #6dac95;
+}
+
+.navigate {
+    display: flex;
+    flex-direction: row;
+}
+
+#addExpenseBtn,
+#deleteExpenseBtn {
+    display: none;
+    width: 15%;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    font-size: small;
+    cursor: pointer;
+}
+
+#addGroupBtn,
+#deleteGroupBtn {
+    width: 20%;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 2px;
+}
+
+#create-group-modal,
+#add-expense-modal {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 20vw;
+    justify-content: center;
+    align-items: center;
+    flex-flow: column nowrap;
+}
+
+#create-group-modal input,
+#add-expense-modal input {
+    width: 80%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+#create-group-modal div,
+#add-expense-modal div {
+    display: flex;
+    flex-flow: row nowrap;
+}
+
+#create-group-modal div button,
+#add-expense-modal div button {
+    width: 70%;
+    padding: 5px;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    font-size: small;
+    cursor: pointer;
+}
