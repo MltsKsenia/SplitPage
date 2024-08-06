@@ -16,59 +16,28 @@
 </head>
 
 <body>
-    <h1>Группы</h1>
-    
-    <!-- Форма создания группы -->
-    <form id="createGroupForm">
-        <label for="groupName">Название группы:</label>
-        <input type="text" id="groupName" name="groupName" required>
-        <button type="submit">Создать группу</button>
-    </form>
+    <div class="container">
+        <h2>Create Group</h2>
 
-    <!-- Форма добавления пользователя в группу -->
-    <form id="addUserToGroupForm">
-        <label for="groupId">ID группы:</label>
-        <input type="text" id="groupId" name="groupId" required>
-        <br>
-        <label for="userEmail">Email пользователя:</label>
-        <input type="email" id="userEmail" name="userEmail" required>
-        <button type="submit">Добавить пользователя в группу</button>
-    </form>
-
-    <!-- Форма добавления расхода -->
-    <form id="addExpenseForm">
-        <label for="groupId">ID группы:</label>
-        <input type="text" id="groupId" name="groupId" required>
-        <br>
-        <label for="description">Описание расхода:</label>
-        <input type="text" id="description" name="description" required>
-        <br>
-        <label for="amount">Сумма:</label>
-        <input type="number" id="amount" name="amount" required>
-        <br>
-        <label for="date">Дата:</label>
-        <input type="date" id="date" name="date" required>
-        <br>
-        <label for="shares">Доли (JSON):</label>
-        <textarea id="shares" name="shares" required>[{"user_id":1,"amount":50},{"user_id":2,"amount":50}]</textarea>
-        <button type="submit">Добавить расход</button>
-    </form>
-
-    <!-- Список групп пользователя -->
-    <div id="userGroups">
-        <!-- Группы пользователя будут отображаться здесь -->
+        <form id="create-group-form">
+            <label for="group-name">Group Name</label>
+            <input type="text" id="group-name" name="group-name" required>
+            <label for="group-members">Group Members (comma-separated emails)</label>
+            <input type="text" id="group-members" name="group-members" required>
+            <button type="submit">Create Group</button>
+        </form>
     </div>
-
-    <!-- Список расходов группы -->
-    <div id="groupExpenses">
-        <!-- Расходы группы будут отображаться здесь -->
+    <div class="container">
+        <h2>Add Expense</h2>
+        <form id="add-expense-form">
+            <label for="group-id">Group ID</label>
+            <input type="text" id="group-id" name="group-id" required>
+            <label for="expense-amount">Expense Amount</label>
+            <input type="number" id="expense-amount" name="expense-amount" required>
+            <button type="submit">Add Expense</button>
+        </form>
     </div>
-
-    <!-- Баланс группы -->
-    <div id="groupBalance">
-        <!-- Баланс группы будет отображаться здесь -->
-    </div>
-
-    <p><a href="profile.html">Вернуться в профиль</a></p>
+    <script src="../public/js/main.js"></script>
 </body>
+
 </html>
