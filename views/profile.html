@@ -12,12 +12,13 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@500;700&family=Quicksand:wght@300..700&display=swap"
         rel="stylesheet">
+    <script src="js/main.js" defer></script>     
 </head>
 
 <body>
     <div class="container">
         <h2>Account Settings</h2>
-        <form action="/update-profile" method="post">
+        <form id="updateProfileForm">
 
             <label for="name">Your Name</label>
             <input type="text" id="name" name="name" value="" required>
@@ -31,7 +32,7 @@
             <button type="submit">Save Changes</button>
         </form>
         <button type="logout">Log Out</button>
-        <button type="logout">Delete your account</button>
+        <p><a href="groups.html">Go to groups</a></p>
     </div>
 </body>
 
