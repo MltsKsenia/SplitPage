@@ -16,8 +16,8 @@ const Expense = require('./models/expense');
 const indexRoutes = require('./routes/index');
 const profileRoutes = require('./routes/profile');
 const groupsRoutes = require('./routes/groups');
-const expensesRoutes = require('./routes/expenses');
 const registerRoutes = require('./routes/register');
+const expenseRoutes = require('./routes/expenses');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -26,7 +26,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRoutes);
 app.use('/register', registerRoutes);
 app.use('/groups', groupsRoutes);
-app.use('/expenses', expensesRoutes);
 app.use('/profile', profileRoutes);
 
 app.listen(port, () => {
