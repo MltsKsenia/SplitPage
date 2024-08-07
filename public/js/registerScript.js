@@ -41,5 +41,5 @@ document.getElementById('registerForm').addEventListener('submit', async (event)
 });
 
 document.getElementById('signupButton')?.addEventListener('click', () => {
-    window.location.href = '../index.html'; // Перенаправление на страницу регистрации
+    window.location.href = '../index.html'; 
 });

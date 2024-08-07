@@ -14,7 +14,7 @@ async function loginUser(email, password) {
             localStorage.setItem('token', data.token);
             localStorage.setItem('userId', data.userId);
             alert('Successfully logged in!');
-            window.location.href = '/profile.html'; // redirection to profile page
+            window.location.href = '../groups.html'; // redirection to group page
         } else {
             alert(data.message || 'Login failed');
         }
