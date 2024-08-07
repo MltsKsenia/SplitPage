@@ -1,44 +1,4 @@
-// document.getElementById('create-group-form').addEventListener('submit', async function (event) {
-//     event.preventDefault();
-//     const groupName = document.getElementById('group-name').value;
-//     const groupMembers = document.getElementById('group-members').value.split(',');
 
-//     const response = await fetch('/groups', {
-//         method: 'POST',
-//         headers: {
-//             'Content-Type': 'application/json'
-//         },
-//         body: JSON.stringify({ groupName, groupMembers })
-//     });
-
-//     const result = await response.json();
-//     if (response.ok) {
-//         alert(`Group created successfully with ID: ${result.groupId}`);
-//     } else {
-//         alert(`Error: ${result.message}`);
-//     }
-// });
-
-// document.getElementById('add-expense-form').addEventListener('submit', async function (event) {
-//     event.preventDefault();
-//     const groupId = document.getElementById('group-id').value;
-//     const expenseAmount = document.getElementById('expense-amount').value;
-
-//     const response = await fetch(`/groups/${groupId}/expenses`, {
-//         method: 'POST',
-//         headers: {
-//             'Content-Type': 'application/json'
-//         },
-//         body: JSON.stringify({ expenseAmount })
-//     });
-
-//     const result = await response.json();
-//     if (response.ok) {
-//         alert('Expense added successfully');
-//     } else {
-//         alert(`Error: ${result.message}`);
-//     }
-// });
 
 // Регистрация пользователя
 async function registerUser(name, email, password) {
@@ -51,13 +11,13 @@ async function registerUser(name, email, password) {
 
         const data = await response.json();
         if (response.ok) {
-            alert('Пользователь успешно зарегистрирован!');
+            alert('User registered!');
             window.location.href = '/index.html'; // Перенаправление на страницу входа
         } else {
             alert(data.message);
         }
     } catch (error) {
-        console.error('Ошибка при регистрации пользователя:', error);
+        console.error('Error:', error);
     }
 }
 
@@ -74,13 +34,13 @@ async function loginUser(email, password) {
         if (response.ok) {
             localStorage.setItem('token', data.token);
             localStorage.setItem('userId', data.userId);
-            alert('Успешный вход!');
+            alert('Entered!');
             window.location.href = '/profile.html'; // Перенаправление на страницу профиля
         } else {
             alert(data.message);
         }
     } catch (error) {
-        console.error('Ошибка при входе пользователя:', error);
+        console.error('Error:', error);
     }
 }
 
@@ -98,13 +58,13 @@ async function updateUserProfile(userId, name, email) {
 
         const data = await response.json();
         if (response.ok) {
-            alert('Профиль успешно обновлен!');
+            alert('Profile updated!');
             window.location.reload();
         } else {
             alert(data.message);
         }
     } catch (error) {
-        console.error('Ошибка при обновлении профиля пользователя:', error);
+        console.error('Error:', error);
     }
 }
 
@@ -122,13 +82,13 @@ async function createGroup(name, created_by) {
 
         const data = await response.json();
         if (response.ok) {
-            alert('Группа успешно создана!');
+            alert('Group created!');
             window.location.reload();
         } else {
             alert(data.message);
         }
     } catch (error) {
-        console.error('Ошибка при создании группы:', error);
+        console.error('Error:', error);
     }
 }
 
@@ -146,13 +106,13 @@ async function addUserToGroup(groupId, email) {
 
         const data = await response.json();
         if (response.ok) {
-            alert('Пользователь успешно добавлен в группу!');
+            alert('User addet to the group successfully!');
             window.location.reload();
         } else {
             alert(data.message);
         }
     } catch (error) {
-        console.error('Ошибка при добавлении пользователя в группу:', error);
+        console.error('Error:', error);
     }
 }
 
@@ -176,7 +136,7 @@ async function addExpense(group_id, description, amount, date, paid_by, shares) 
             alert(data.message);
         }
     } catch (error) {
-        console.error('Ошибка при добавлении расхода:', error);
+        console.error('Error:', error);
     }
 }
 
@@ -194,7 +154,7 @@ async function getUserGroups(userId) {
             alert(groups.message);
         }
     } catch (error) {
-        console.error('Ошибка при получении групп пользователя:', error);
+        console.error('Error:', error);
     }
 }
 
@@ -212,7 +172,7 @@ async function getGroupExpenses(groupId) {
             alert(expenses.message);
         }
     } catch (error) {
-        console.error('Ошибка при получении расходов группы:', error);
+        console.error('Error:', error);
     }
 }
 
@@ -231,7 +191,7 @@ async function getGroupBalance(groupId) {
             alert(balance.message);
         }
     } catch (error) {
-        console.error('Ошибка при получении баланса группы:', error);
+        console.error('Error:', error);
     }
 }
 
@@ -245,13 +205,13 @@ async function deleteGroup(groupId) {
 
         const data = await response.json();
         if (response.ok) {
-            alert('Группа успешно удалена!');
+            alert('Group successfully deleted!');
             window.location.reload();
         } else {
             alert(data.message);
         }
     } catch (error) {
-        console.error('Ошибка при удалении группы:', error);
+        console.error('Error with delete:', error);
     }
 }
 

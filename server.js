@@ -9,11 +9,11 @@ const port = 3000;
 
 const db = require('./configdb/database');
 
-const User = require('./models/user');
-const Group = require('./models/group');
-const Expense = require('./models/expense');
+// const User = require('./models/user');
+// const Group = require('./models/group');
+// const Expense = require('./models/expense');
 
-const groupsRoutes = require('./routes/groups');
+const groupRoutes = require('./routes/groups');
 const expenseRoutes = require('./routes/expenses');
 const userRoutes = require('./routes/user');
 

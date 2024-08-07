@@ -8,7 +8,7 @@ exports.register = async (req, res) => {
     const { name, email, password } = req.body;
     try {
         // Проверяем, существует ли пользователь
-        const user = await db('Users').where({ email }).first();
+        const user = await db('users').where({ email }).first();
         if (user) {
             return res.status(400).json({ message: 'Пользователь с таким email уже существует' });
         }
@@ -17,7 +17,7 @@ exports.register = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Сохраняем пользователя в базу данных
-        const newUser = await db('Users').insert({ name, email, password: hashedPassword }).returning('*');
+        const newUser = await db('users').insert({ name, email, password: hashedPassword }).returning('*');
         res.status(201).json(newUser);
     } catch (error) {
         console.error('Ошибка при регистрации пользователя:', error);
@@ -30,7 +30,7 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
     try {
         // Проверяем, существует ли пользователь
-        const user = await db('Users').where({ email }).first();
+        const user = await db('users').where({ email }).first();
         if (!user) {
             return res.status(400).json({ message: 'Неверный email или пароль' });
         }
@@ -55,7 +55,7 @@ exports.login = async (req, res) => {
 exports.getUserProfile = async (req, res) => {
     const { userId } = req.params;
     try {
-        const user = await db('Users').where({ id: userId }).select('id', 'name', 'email').first();
+        const user = await db('users').where({ id: userId }).select('id', 'name', 'email').first();
         if (!user) {
             return res.status(404).json({ message: 'Пользователь не найден' });
         }
@@ -71,7 +71,7 @@ exports.updateUserProfile = async (req, res) => {
     const { userId } = req.params;
     const { name, email } = req.body;
     try {
-        const updatedUser = await db('Users').where({ id: userId }).update({ name, email }).returning(['id', 'name', 'email']);
+        const updatedUser = await db('users').where({ id: userId }).update({ name, email }).returning(['id', 'name', 'email']);
         res.json(updatedUser);
     } catch (error) {
         console.error('Ошибка при обновлении профиля пользователя:', error);
