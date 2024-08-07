@@ -20,11 +20,12 @@ const db = knex({
 });
 
 
-async function getVersion(){
-    try{
+async function getVersion() {
+    try {
         const res = await db.raw('select version()');
         console.log(res);
-    }catch(error){
+    }
+    catch (error) {
         console.log(error);
     }
 }
