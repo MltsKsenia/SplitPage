@@ -39,5 +39,5 @@ document.getElementById('loginButton').addEventListener('click', async () => {
 
 // button "Sign Up"
 document.getElementById('signupButton').addEventListener('click', () => {
-    window.location.href = '/registration.html'; // redirection to register page
+    window.location.href = '/register.html'; // redirection to register page
 });
