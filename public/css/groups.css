@@ -20,11 +20,12 @@ body {
     margin: 0;
 }
 
-h1 {
+nav {
     position: absolute;
     color: white;
-    justify-content: flex-start;
+    justify-content: space-around;
     align-self: flex-start;
+    flex-flow: row nowrap;
 }
 
 .container {
@@ -168,4 +169,12 @@ button:active {
     color: #fff;
     font-size: small;
     cursor: pointer;
+}
+
+#debtValue {
+    border-top: 3px solid #095b4d;
+    display: flex;
+    justify-content: flex-end;
+    align-content: flex-end;
+    color: black;
 }

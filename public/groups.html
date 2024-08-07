@@ -12,11 +12,17 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@500;700&family=Quicksand:wght@300..700&display=swap"
         rel="stylesheet">
-    <script src="./js/main.js" defer></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
+    <script src="js/main.js" defer></script>
+
 </head>
 
 <body>
-    <h1>Expense Manager</h1>
+    <nav>
+        <h1>Expense Manager</h1>
+        <a href="profile.html">Profile</a>
+    </nav>
     <div class="container">
         <div class="sidebar">
             <div class="header">
@@ -35,6 +41,7 @@
             </div>
             <ul id="expenseList">
             </ul>
+            <span id="debtValue">0</span>
         </div>
     </div>
 
@@ -52,12 +59,15 @@
         <h3>Add Expense</h3>
         <input type="text" id="expenseName" placeholder="Expense name">
         <input type="number" id="amount" placeholder="Amount">
-        <input type="date" id="expenseDate" placeholder="Date">
-        <input type="text" id="paidBy" placeholder="Paid by">
-        <input type="text" id="groupId" placeholder="Group ID">
-        <input type="text" id="shares" placeholder="Shares (separated by /)">
+        <input type="date" id="expenseDate" placeholder="Date" value="${new Date().toISOString().split('T')[0]}">
+        <input type="hidden" id="groupId">
         <div>
-            <button onclick="addExpenseHandler()">Add</button>
+            <button onclick="addExpenseHandler('you', 'split')">You paid, split equally</button>
+            <button onclick="addExpenseHandler('you', 'full')">You are owed the full amount</button>
+            <button onclick="addExpenseHandler('friend', 'split')">Friend paid, split equally</button>
+            <button onclick="addExpenseHandler('friend', 'full')">Friend is owed the full amount</button>
+        </div>
+        <div>
             <button onclick="hideCreateModal()">Cancel</button>
         </div>
     </div>
