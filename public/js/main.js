@@ -331,6 +331,103 @@ function enableDeleteGroups() {
         });
     });
 }
+// // Получение групп пользователя
+// async function getUserGroups(userId) {
+//     try {
+//         const response = await fetch(`/api/groups/user/${userId}`, {
+//             headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+//         });
+
+//         const groups = await response.json();
+//         if (response.ok) {
+//             const groupList = document.getElementById('groupList');
+//             groupList.innerHTML = '';
+//             groups.forEach(group => {
+//                 const groupItem = document.createElement('li');
+//                 groupItem.textContent = `${group.name} (${group.id})`;
+//                 groupItem.setAttribute('data-group-id', group.id);
+//                 groupItem.addEventListener('click', () => showExpenses(group.id, group.name));
+//                 groupList.appendChild(groupItem);
+//             });
+//         } else {
+//             alert(groups.message);
+//         }
+//     } catch (error) {
+//         console.error('Error:', error);
+//     }
+// }
+
+// // Получение расходов группы
+// async function getGroupExpenses(groupId) {
+//     try {
+//         const response = await fetch(`/api/expenses/group/${groupId}`, {
+//             headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+//         });
+
+//         const expenses = await response.json();
+//         if (response.ok) {
+//             return expenses;
+//         } else {
+//             alert(expenses.message);
+//         }
+//     } catch (error) {
+//         console.error('Error:', error);
+//     }
+// }
+
+// // Получение баланса группы
+// async function getGroupBalance(groupId) {
+//     try {
+//         const response = await fetch(`/api/groups/${groupId}/balance`, {
+//             headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+//         });
+
+//         const balance = await response.json();
+//         if (response.ok) {
+//             return balance;
+//         } else {
+//             alert(balance.message);
+//         }
+//     } catch (error) {
+//         console.error('Error:', error);
+//     }
+// }
+
+// // Обновление долгов
+// async function updateDebt(groupId) {
+//     try {
+//         const balance = await getGroupBalance(groupId);
+//         if (balance) {
+//             document.getElementById('groupBalance').textContent = `Balance: ${balance.total}`;
+//         } else {
+//             console.error('Balance data is invalid or undefined:', balance);
+//         }
+//     } catch (error) {
+//         console.error('Error:', error);
+//     }
+// }
+
+// // Проверка токена и извлечение информации о пользователе
+// document.addEventListener('DOMContentLoaded', () => {
+//     const token = localStorage.getItem('token');
+//     if (token) {
+//         const decodedToken = jwt_decode(token);
+//         const userId = decodedToken.user_id;
+
+//         // Получение групп пользователя при загрузке страницы
+//         getUserGroups(userId);
+//     } else {
+//         window.location.href = '/login';
+//     }
+// });
+
+// document.getElementById('createGroupBtn').addEventListener('click', createGroupHandler);
+// document.getElementById('createExpenseBtn').addEventListener('click', () => addExpenseHandler('you', 'split'));
+// document.getElementById('createFriendExpenseBtn').addEventListener('click', () => addExpenseHandler('friend', 'split'));
+// document.getElementById('fullExpenseBtn').addEventListener('click', () => addExpenseHandler('you', 'full'));
+// document.getElementById('fullFriendExpenseBtn').addEventListener('click', () => addExpenseHandler('friend', 'full'));
+// document.getElementById('cancelCreateGroupBtn').addEventListener('click', hideCreateModal);
+// document.getElementById('cancelAddExpenseBtn').addEventListener('click', hideCreateModal);
 
 // document.addEventListener('DOMContentLoaded', () => {
 //     // Пример использования функции для регистрации пользователя
