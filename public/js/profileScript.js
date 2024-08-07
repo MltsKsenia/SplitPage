@@ -73,11 +73,10 @@ document.getElementById('updateProfileForm').addEventListener('submit', async (e
     await updateUserProfile(name, email, password);
 });
 
-// document.getElementById('logoutButton').addEventListener('click', () => {
-//     logout();
-// });
+document.getElementById('logoutButton').addEventListener('click', () => {
+    logout();
+});
 
 document.getElementById('goToGroupsButton').addEventListener('click', () => {
     window.location.href = '../groups.html'; 
 });
-
