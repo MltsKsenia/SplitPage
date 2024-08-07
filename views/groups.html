@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Split Page: Groups</title>
+    <title>Split Page: Expense Manager</title>
     <link rel="stylesheet" href="../public/css/groups.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,10 +12,11 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@500;700&family=Quicksand:wght@300..700&display=swap"
         rel="stylesheet">
-    <script src="js/main.js" defer></script>     
+    <script src="../public/js/main.js" defer></script>
 </head>
 
 <body>
+    <h1>Expense Manager</h1>
     <div class="container">
         <div class="sidebar">
             <div class="header">
@@ -40,9 +41,9 @@
     <div id="create-group-modal">
         <h3>Create New Group</h3>
         <input type="text" id="groupNameInput" placeholder="Group Name">
-        <input type="email" id="groupEmailInput" placeholder="Email">
+        <input type="email" id="friendEmailInput" placeholder="Friend Email">
         <div>
-            <button onclick="createGroup()">Create</button>
+            <button onclick="createGroupHandler()">Create</button>
             <button onclick="hideCreateGroupModal()">Cancel</button>
         </div>
     </div>
@@ -51,12 +52,15 @@
         <h3>Add Expense</h3>
         <input type="text" id="expenseName" placeholder="Expense name">
         <input type="number" id="amount" placeholder="Amount">
+        <input type="date" id="expenseDate" placeholder="Date">
+        <input type="text" id="paidBy" placeholder="Paid by">
+        <input type="text" id="groupId" placeholder="Group ID">
+        <input type="text" id="shares" placeholder="Shares (separated by /)">
         <div>
-            <button onclick="createExpense()">Add</button>
+            <button onclick="addExpenseHandler()">Add</button>
             <button onclick="hideCreateModal()">Cancel</button>
         </div>
     </div>
-    <script src="../public/js/groups.js"></script>
 </body>
 
 </html>
