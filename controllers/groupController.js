@@ -3,25 +3,41 @@ const db = require('../configdb/database');
 
 // Создание группы
 exports.createGroup = async (req, res) => {
-    const { name, created_by } = req.body;
+    const { name, created_by, friendId } = req.body;
     try {
-        // Создаем новую группу
-        const newGroup = await db('groups').insert({ name, created_by }).returning('*');
-        await db('usergroups').insert({ user_id: created_by, group_id: newGroup.id });
-        res.status(201).json(newGroup);
+        // Проверяем, что name, created_by и friendId предоставлены
+        if (!name || !created_by || !friendId) {
+            return res.status(400).json({ message: 'Name, created_by, and friendId are required' });
+        }
+
+        // Преобразуем created_by и friendId в числа
+        const createdBy = Number(created_by);
+        const friendIdNumber = Number(friendId);
+
+        // Создание группы
+        const [groupIdRow] = await db('groups').insert({ name, created_by: createdBy }).returning('id');
+        const groupId = groupIdRow.id || groupIdRow; // В зависимости от версии Knex возвращается объект или значение
+
+        // Добавление создателя группы в usergroups
+        await db('usergroups').insert({ group_id: groupId, user_id: createdBy });
+
+        // Добавление второго пользователя в usergroups
+        await db('usergroups').insert({ group_id: groupId, user_id: friendIdNumber });
+
+        res.status(201).json({ message: 'Group created successfully', group: { id: groupId, name } });
     } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ message: 'Server Error' });
+        console.error('Error creating group:', error.message);
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
-
 // Добавление пользователя в группу
 exports.addUserToGroup = async (req, res) => {
     const { groupId } = req.params;
-    const { email } = req.body;
+    const { friendId } = req.body; // Получаем friendId из тела запроса
+
     try {
-        // Проверяем, существует ли пользователь с таким email
-        const user = await db('users').where({ email }).first();
+        // Проверяем, существует ли пользователь с таким ID
+        const user = await db('users').where({ id: friendId }).first();
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -33,25 +49,30 @@ exports.addUserToGroup = async (req, res) => {
         }
 
         // Добавляем пользователя в группу
-        await db('usergroups').insert({ user_id: user.id, group_id: groupId });
+        await db('usergroups').insert({ user_id: friendId, group_id: groupId });
         res.status(200).json({ message: 'User added to group' });
     } catch (error) {
-        console.error('Error with adding user to group:', error);
-        res.status(500).json({ message: 'Server error' });
+        console.error('Error with adding user to group:', error.message);
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
-
+//groupController.js
 // Получение групп пользователя
 exports.getUserGroups = async (req, res) => {
     const { userId } = req.params;
     try {
+        console.log(`Fetching groups for user with ID: ${userId}`);
+
         const groups = await db('usergroups')
-            .join('groups', 'usergroups.group_id', 'groups.id')
+            .join('usergroups', 'groups.id', 'usergroups.group_id')
             .where('usergroups.user_id', userId)
-            .select('groups.id', 'groups.name', 'groups.created_by');
-        res.json(groups);
+            .select('groups.id', 'groups.name');
+
+        console.log('Groups fetched:', groups);
+
+        res.status(200).json(groups);
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error fetching user groups:', error);
         res.status(500).json({ message: 'Server error' });
     }
 };
