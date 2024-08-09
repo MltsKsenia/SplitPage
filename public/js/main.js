@@ -1,82 +1,43 @@
 //main.js
 
-// document.getElementById('addExpenseBtn').addEventListener('click', showAddExpenseModal);
-// document.getElementById('deleteExpenseBtn').addEventListener('click', enableDeleteExpenses);
-
-function showExpenses(groupName) {
-    document.getElementById('selectedGroupName').textContent = groupName;
-    document.getElementById('addExpenseBtn').style.display = 'block';
-    document.getElementById('deleteExpenseBtn').style.display = 'block';
-    const expenseList = document.getElementById('expenseList');
-    expenseList.innerHTML = '';
-}
-
-// function enableDeleteExpenses() {
-//     const expenseItems = document.querySelectorAll('#expenseList li');
-//     expenseItems.forEach(expenseItem => {
-//         expenseItem.style.backgroundColor = '#6dac95';
-
-//         expenseItem.addEventListener('click', () => {
-//             expenseItem.remove();
-//         });
-
-//         expenseItem.addEventListener('mouseover', () => {
-//             expenseItem.style.backgroundColor = '#095b4d';
-//             expenseItem.style.cursor = 'pointer';
-//         });
-
-//         expenseItem.addEventListener('mouseout', () => {
-//             expenseItem.style.backgroundColor = '#6dac95';
-//             expenseItem.style.cursor = 'pointer';
-//         });
-
-//         expenseItem.addEventListener('mousedown', () => {
-//             expenseItem.style.backgroundColor = '#6dac95';
-//             expenseItem.style.cursor = 'pointer';
-//         });
-
-//         expenseItem.addEventListener('mouseup', () => {
-//             expenseItem.style.backgroundColor = '#095b4d';
-//             expenseItem.style.cursor = 'pointer';
-//         });
-//     });
-// }
-
-function showAddExpenseModal() {
-    document.getElementById('add-expense-modal').style.display = 'flex';
-}
+// Calling a function to load groups after the page has loaded
+document.addEventListener('DOMContentLoaded', () => {
+    const userId = localStorage.getItem('userId');
+    if (userId) {
+        getUserGroups(userId);
+    }
+});
 
 function hideCreateModal() {
     document.getElementById('create-group-modal').style.display = 'none';
     document.getElementById('add-expense-modal').style.display = 'none';
 }
 
-// Создание группы и добавление пользователя в группу
+// Creating a group and adding a user to the group
 document.getElementById('addGroupBtn').addEventListener('click', showCreateGroupModal);
 function showCreateGroupModal() {
     document.getElementById('create-group-modal').style.display = 'flex';
 }
 async function createGroupAndAddUser(groupName, created_by, friendId) {
     try {
-        // Создание группы
+        // Creating a group
         const groupResponse = await fetch('/api/groups/create', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
-            body: JSON.stringify({ name: groupName, created_by, friendId }) // Передаем friendId здесь
+            body: JSON.stringify({ name: groupName, created_by, friendId })
         });
 
         const groupData = await groupResponse.json();
         if (groupResponse.ok) {
-            alert('Group created!');
+            // alert('Group created!');
 
-            // Добавление пользователя в группу
-            const groupId = groupData.group.id; // Предполагается, что API возвращает ID группы
-            // Обновление интерфейса или другое действие
-            alert('User added to the group successfully!');
-            // window.location.reload();
+            // Adding a user to the group
+            const groupId = groupData.group.id;
+            window.location.reload();
+            // alert('User added to the group successfully!');
         } else {
             alert(groupData.message);
         }
@@ -84,7 +45,6 @@ async function createGroupAndAddUser(groupName, created_by, friendId) {
         console.error('Error:', error);
     }
 }
-
 function createGroupHandler() {
     const groupName = document.getElementById('groupNameInput').value;
     const friendId = document.getElementById('friendIdInput').value;
@@ -93,20 +53,18 @@ function createGroupHandler() {
     if (groupName && friendId) {
         const groupList = document.getElementById('groupList');
         const groupItem = document.createElement('li');
-        groupItem.textContent = `${groupName} (${friendId})`;
+        groupItem.textContent = `${groupName}`;
 
         groupItem.addEventListener('click', () => showExpenses(groupName));
         groupList.appendChild(groupItem);
         document.getElementById('groupNameInput').value = '';
         document.getElementById('friendIdInput').value = '';
         hideCreateModal();
-        // Вызов асинхронной функции для создания группы и добавления пользователя
         createGroupAndAddUser(groupName, created_by, friendId);
     } else {
         alert('Please enter both group name and friend ID.');
     }
 }
-// Получение групп пользователя
 async function getUserGroups(userId) {
     try {
         const response = await fetch(`/api/groups/user/${userId}`, {
@@ -119,39 +77,38 @@ async function getUserGroups(userId) {
         }
 
         const userGroups = await response.json();
-        console.log('Groups fetched:', userGroups); // Лог для проверки данных
+        // console.log('Groups fetched:', userGroups); // Лог для проверки данных
 
         const groupList = document.getElementById('groupList');
-        groupList.innerHTML = ''; // Очищаем список перед добавлением
+        groupList.innerHTML = '';
 
         userGroups.forEach(userGroup => {
             const groupItem = document.createElement('li');
-            groupItem.textContent = `${userGroup.name} (${userGroup.id})`;
+            groupItem.textContent = `${userGroup.name}`;
             groupItem.setAttribute('data-group-id', userGroup.id);
             groupItem.addEventListener('click', () => showExpenses(userGroup.id, userGroup.name));
             groupList.appendChild(groupItem);
-            console.log('Group item added:', groupItem); // Лог добавленных элементов
+            // console.log('Group item added:', groupItem); // Лог добавленных элементов
         });
     } catch (error) {
         console.error('Error:', error.message);
         alert('Failed to fetch groups: ' + error.message);
     }
 }
-
-// Проверка токена и извлечение информации о пользователе
+// Verifying the token and extracting user information
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
     if (token) {
         try {
             const decodedToken = jwt_decode(token);
-            console.log('Decoded Token:', decodedToken);  // Лог структуры токена
+            // console.log('Decoded Token:', decodedToken);  // Лог структуры токена
 
-            const userId = decodedToken.id; // Проверка ключа
-            console.log('User ID:', userId); // Лог user ID для проверки
+            const userId = decodedToken.id;
+            // console.log('User ID:', userId); // Лог user ID для проверки
 
-            // Убедитесь, что `userId` не равен `undefined`
+            // Make sure `userId` is not `undefined`
             if (userId) {
-                getUserGroups(userId);  // Вызов функции с правильным userId
+                getUserGroups(userId);
             } else {
                 console.error('Error: userId is undefined');
             }
@@ -164,12 +121,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Обработчик на кнопку удаления группы
+// Handler for the delete group button
 document.getElementById('deleteGroupBtn').addEventListener('click', () => {
     enableDeleteGroups();
 });
 
-// Удаление группы
+// Deleting a group
 async function deleteGroup(groupId) {
     try {
         const response = await fetch(`/api/groups/${groupId}`, {
@@ -182,7 +139,7 @@ async function deleteGroup(groupId) {
 
         const data = await response.json();
         if (response.ok) {
-            alert('Group successfully deleted!');
+            // alert('Group successfully deleted!');
             return data;
         } else {
             throw new Error(data.message);
@@ -192,15 +149,16 @@ async function deleteGroup(groupId) {
         throw error;
     }
 }
-// Обработчик удаления группы
+// Group Delete Handler
 async function deleteGroupHandler(groupItem, groupId) {
     if (confirm('Are you sure you want to delete this group?')) {
         try {
-            await deleteGroup(groupId);  // Дождаться завершения удаления
+            await deleteGroup(groupId);
 
-            // Если удаление прошло успешно, удалить элемент из UI
+            // If the deletion was successful, remove the element from the UI
             groupItem.remove();
-            cancelDeleteMode()
+            cancelDeleteMode();
+            // window.location.reload();
         } catch (error) {
             console.error('Error during deletion:', error);
             alert('Failed to delete the group. Please try again.');
@@ -208,20 +166,20 @@ async function deleteGroupHandler(groupItem, groupId) {
     }
 }
 
-// Функция для включения возможности удаления групп
+// Function to enable the ability to delete groups
 function enableDeleteGroups() {
     const groupItems = document.querySelectorAll('#groupList li');
 
-    // Окрашивание всех элементов при активации режима удаления
+    // Coloring all elements when deletion mode is activated
     groupItems.forEach(groupItem => {
-        groupItem.style.backgroundColor = '#ff7f7f'; // Фон при активации удаления
+        groupItem.style.backgroundColor = '#ff7f7f';
 
         groupItem.addEventListener('click', () => {
             const groupId = groupItem.getAttribute('data-group-id');
             deleteGroupHandler(groupItem, groupId);
         });
 
-        // Наведение на элементы li
+        // Hover over li elements
         groupItem.addEventListener('mouseover', () => {
             groupItem.style.backgroundColor = '#ff4d4d';
             groupItem.style.cursor = 'pointer';
@@ -231,54 +189,73 @@ function enableDeleteGroups() {
             groupItem.style.backgroundColor = '#ff7f7f';
             groupItem.style.cursor = 'pointer';
         });
-        // Обработка нажатия на элемент li
+        // Click on li element
         groupItem.addEventListener('mousedown', () => {
             groupItem.style.backgroundColor = '#ff7f7f';
             groupItem.style.cursor = 'pointer';
         });
 
-        // При отпускании мыши, если элемент выбран для удаления
         groupItem.addEventListener('mouseup', () => {
             groupItem.style.backgroundColor = '#ff4d4d';
             groupItem.style.cursor = 'pointer';
         });
     });
-    //  Сброс цветов после завершения удаления
+
+    //  Reset colors after uninstall completes
     document.addEventListener('deleteComplete', () => {
         groupItems.forEach(groupItem => {
-            groupItem.style.backgroundColor = ''; // Возвращаем цвет к оригинальному из CSS
+            groupItem.style.backgroundColor = '';
             groupItem.style.cursor = '';
         });
     });
 }
-// Функция для отмены режима удаления
+
+// Function to cancel the delete mode
 function cancelDeleteMode() {
     const groupItems = document.querySelectorAll('#groupList li');
     groupItems.forEach(groupItem => {
-        groupItem.style.backgroundColor = ''; // Сброс цвета на исходный
+        groupItem.style.backgroundColor = '';
         groupItem.style.cursor = '';
-        // Удаление старого обработчика клика
+        // Removing the old click handler
         const newGroupItem = groupItem.cloneNode(true);
         groupItem.parentNode.replaceChild(newGroupItem, groupItem);
 
-        // Добавление нового обработчика клика
+        // Adding a new click handler
         newGroupItem.addEventListener('click', () => {
-            const groupName = newGroupItem.textContent.trim(); // Получение названия группы
+            const groupName = newGroupItem.textContent.trim();
             showExpenses(groupName);
         });
     });
 }
-// Вызов функции для загрузки групп после загрузки страницы
-document.addEventListener('DOMContentLoaded', () => {
-    const userId = localStorage.getItem('userId');
-    if (userId) {
-        getUserGroups(userId);
+// Handler for the delete group button
+let deleteModeActive = false;
+document.getElementById('deleteGroupBtn').addEventListener('click', () => {
+    if (deleteModeActive) {
+        // If the deletion mode is active, cancel it
+        cancelDeleteMode();
+        deleteModeActive = false;
+    } else {
+        // If the deletion mode is not active, enable it
+        enableDeleteGroups();
+        deleteModeActive = true;
     }
 });
 
-
+// Functions for displaying expenses
+function showExpenses(groupName) {
+    document.getElementById('selectedGroupName').textContent = groupName;
+    document.getElementById('addExpenseBtn').style.display = 'block';
+    document.getElementById('deleteExpenseBtn').style.display = 'block';
+    const expenseList = document.getElementById('expenseList');
+    expenseList.innerHTML = '';
+}
+function showAddExpenseModal() {
+    document.getElementById('add-expense-modal').style.display = 'flex';
+}
 
 // // Добавление расхода
+// document.getElementById('addExpenseBtn').addEventListener('click', showAddExpenseModal);
+
 // async function addExpense(group_id, description, amount, date, paid_by, shares) {
 //     try {
 //         const response = await fetch('/api/expenses/add', {
