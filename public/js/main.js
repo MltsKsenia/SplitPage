@@ -2,8 +2,8 @@
 // Декорация страницы с группами и расходами
 document.getElementById('addGroupBtn').addEventListener('click', showCreateGroupModal);
 document.getElementById('addExpenseBtn').addEventListener('click', showAddExpenseModal);
-document.getElementById('deleteExpenseBtn').addEventListener('click', enableDeleteExpenses);
-document.getElementById('deleteGroupBtn').addEventListener('click', enableDeleteGroups);
+// document.getElementById('deleteExpenseBtn').addEventListener('click', enableDeleteExpenses);
+// document.getElementById('deleteGroupBtn').addEventListener('click', enableDeleteGroups);
 
 function showExpenses(groupName) {
     document.getElementById('selectedGroupName').textContent = groupName;
@@ -13,36 +13,36 @@ function showExpenses(groupName) {
     expenseList.innerHTML = '';
 }
 
-function enableDeleteExpenses() {
-    const expenseItems = document.querySelectorAll('#expenseList li');
-    expenseItems.forEach(expenseItem => {
-        expenseItem.style.backgroundColor = '#6dac95';
+// function enableDeleteExpenses() {
+//     const expenseItems = document.querySelectorAll('#expenseList li');
+//     expenseItems.forEach(expenseItem => {
+//         expenseItem.style.backgroundColor = '#6dac95';
 
-        expenseItem.addEventListener('click', () => {
-            expenseItem.remove();
-        });
+//         expenseItem.addEventListener('click', () => {
+//             expenseItem.remove();
+//         });
 
-        expenseItem.addEventListener('mouseover', () => {
-            expenseItem.style.backgroundColor = '#095b4d';
-            expenseItem.style.cursor = 'pointer';
-        });
+//         expenseItem.addEventListener('mouseover', () => {
+//             expenseItem.style.backgroundColor = '#095b4d';
+//             expenseItem.style.cursor = 'pointer';
+//         });
 
-        expenseItem.addEventListener('mouseout', () => {
-            expenseItem.style.backgroundColor = '#6dac95';
-            expenseItem.style.cursor = 'pointer';
-        });
+//         expenseItem.addEventListener('mouseout', () => {
+//             expenseItem.style.backgroundColor = '#6dac95';
+//             expenseItem.style.cursor = 'pointer';
+//         });
 
-        expenseItem.addEventListener('mousedown', () => {
-            expenseItem.style.backgroundColor = '#6dac95';
-            expenseItem.style.cursor = 'pointer';
-        });
+//         expenseItem.addEventListener('mousedown', () => {
+//             expenseItem.style.backgroundColor = '#6dac95';
+//             expenseItem.style.cursor = 'pointer';
+//         });
 
-        expenseItem.addEventListener('mouseup', () => {
-            expenseItem.style.backgroundColor = '#095b4d';
-            expenseItem.style.cursor = 'pointer';
-        });
-    });
-}
+//         expenseItem.addEventListener('mouseup', () => {
+//             expenseItem.style.backgroundColor = '#095b4d';
+//             expenseItem.style.cursor = 'pointer';
+//         });
+//     });
+// }
 
 function showCreateGroupModal() {
     document.getElementById('create-group-modal').style.display = 'flex';
@@ -115,42 +115,57 @@ async function getUserGroups(userId) {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
 
-        const groups = await response.json();
-        console.log('Groups fetched:', groups); // Лог для проверки данных
-
-        if (response.ok) {
-            const groupList = document.getElementById('groupList');
-            groupList.innerHTML = ''; // Очищаем список перед добавлением
-
-            groups.forEach(group => {
-                const groupItem = document.createElement('li');
-                groupItem.textContent = `${group.name} (${group.id})`;
-                groupItem.setAttribute('data-group-id', group.id);
-                groupItem.addEventListener('click', () => showExpenses(group.id, group.name));
-                groupList.appendChild(groupItem);
-                console.log('Group item added:', groupItem); // Лог добавленных элементов
-            });
-        } else {
-            alert(groups.message);
+        if (!response.ok) {
+            const errorMessage = await response.text();
+            throw new Error(`Error fetching groups: ${errorMessage}`);
         }
+
+        const userGroups = await response.json();
+        console.log('Groups fetched:', userGroups); // Лог для проверки данных
+
+        const groupList = document.getElementById('groupList');
+        groupList.innerHTML = ''; // Очищаем список перед добавлением
+
+        userGroups.forEach(userGroup => {
+            const groupItem = document.createElement('li');
+            groupItem.textContent = `${userGroup.name} (${userGroup.id})`;
+            groupItem.setAttribute('data-group-id', userGroup.id);
+            groupItem.addEventListener('click', () => showExpenses(userGroup.id, userGroup.name));
+            groupList.appendChild(groupItem);
+            console.log('Group item added:', groupItem); // Лог добавленных элементов
+        });
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error:', error.message);
+        alert('Failed to fetch groups: ' + error.message);
     }
 }
+
 // Проверка токена и извлечение информации о пользователе
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
     if (token) {
-        const decodedToken = jwt_decode(token);
-        const userId = decodedToken.user_id;
-        console.log('User ID:', userId); // Лог user ID
+        try {
+            const decodedToken = jwt_decode(token);
+            console.log('Decoded Token:', decodedToken);  // Лог структуры токена
 
-        // Получение групп пользователя при загрузке страницы
-        getUserGroups(userId);
+            const userId = decodedToken.id; // Проверка ключа
+            console.log('User ID:', userId); // Лог user ID для проверки
+
+            // Убедитесь, что `userId` не равен `undefined`
+            if (userId) {
+                getUserGroups(userId);  // Вызов функции с правильным userId
+            } else {
+                console.error('Error: userId is undefined');
+            }
+        } catch (error) {
+            console.error('Error decoding token:', error);
+        }
     } else {
+        console.error('No token found in localStorage');
         window.location.href = '/login';
     }
 });
+
 // // Добавление расхода
 // async function addExpense(group_id, description, amount, date, paid_by, shares) {
 //     try {
