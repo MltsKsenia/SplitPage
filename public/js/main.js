@@ -306,38 +306,3 @@ function showAddExpenseModal() {
 //         alert('Please enter all required fields.');
 //     }
 // }
-
-
-//Удаление расхода
-// document.getElementById('deleteExpenseBtn').addEventListener('click', enableDeleteExpenses);
-
-// function enableDeleteExpenses() {
-//     const expenseItems = document.querySelectorAll('#expenseList li');
-//     expenseItems.forEach(expenseItem => {
-//         expenseItem.style.backgroundColor = '#6dac95';
-
-//         expenseItem.addEventListener('click', () => {
-//             expenseItem.remove();
-//         });
-
-//         expenseItem.addEventListener('mouseover', () => {
-//             expenseItem.style.backgroundColor = '#095b4d';
-//             expenseItem.style.cursor = 'pointer';
-//         });
-
-//         expenseItem.addEventListener('mouseout', () => {
-//             expenseItem.style.backgroundColor = '#6dac95';
-//             expenseItem.style.cursor = 'pointer';
-//         });
-
-//         expenseItem.addEventListener('mousedown', () => {
-//             expenseItem.style.backgroundColor = '#6dac95';
-//             expenseItem.style.cursor = 'pointer';
-//         });
-
-//         expenseItem.addEventListener('mouseup', () => {
-//             expenseItem.style.backgroundColor = '#095b4d';
-//             expenseItem.style.cursor = 'pointer';
-//         });
-//     });
-// }
