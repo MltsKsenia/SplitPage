@@ -1,9 +1,7 @@
 //main.js
-// Декорация страницы с группами и расходами
-document.getElementById('addGroupBtn').addEventListener('click', showCreateGroupModal);
-document.getElementById('addExpenseBtn').addEventListener('click', showAddExpenseModal);
+
+// document.getElementById('addExpenseBtn').addEventListener('click', showAddExpenseModal);
 // document.getElementById('deleteExpenseBtn').addEventListener('click', enableDeleteExpenses);
-// document.getElementById('deleteGroupBtn').addEventListener('click', enableDeleteGroups);
 
 function showExpenses(groupName) {
     document.getElementById('selectedGroupName').textContent = groupName;
@@ -44,10 +42,6 @@ function showExpenses(groupName) {
 //     });
 // }
 
-function showCreateGroupModal() {
-    document.getElementById('create-group-modal').style.display = 'flex';
-}
-
 function showAddExpenseModal() {
     document.getElementById('add-expense-modal').style.display = 'flex';
 }
@@ -58,6 +52,10 @@ function hideCreateModal() {
 }
 
 // Создание группы и добавление пользователя в группу
+document.getElementById('addGroupBtn').addEventListener('click', showCreateGroupModal);
+function showCreateGroupModal() {
+    document.getElementById('create-group-modal').style.display = 'flex';
+}
 async function createGroupAndAddUser(groupName, created_by, friendId) {
     try {
         // Создание группы
@@ -165,6 +163,120 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = '/login';
     }
 });
+
+// Обработчик на кнопку удаления группы
+document.getElementById('deleteGroupBtn').addEventListener('click', () => {
+    enableDeleteGroups();
+});
+
+// Удаление группы
+async function deleteGroup(groupId) {
+    try {
+        const response = await fetch(`/api/groups/${groupId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+            alert('Group successfully deleted!');
+            return data;
+        } else {
+            throw new Error(data.message);
+        }
+    } catch (error) {
+        console.error('Error with delete:', error);
+        throw error;
+    }
+}
+// Обработчик удаления группы
+async function deleteGroupHandler(groupItem, groupId) {
+    if (confirm('Are you sure you want to delete this group?')) {
+        try {
+            await deleteGroup(groupId);  // Дождаться завершения удаления
+
+            // Если удаление прошло успешно, удалить элемент из UI
+            groupItem.remove();
+            cancelDeleteMode()
+        } catch (error) {
+            console.error('Error during deletion:', error);
+            alert('Failed to delete the group. Please try again.');
+        }
+    }
+}
+
+// Функция для включения возможности удаления групп
+function enableDeleteGroups() {
+    const groupItems = document.querySelectorAll('#groupList li');
+
+    // Окрашивание всех элементов при активации режима удаления
+    groupItems.forEach(groupItem => {
+        groupItem.style.backgroundColor = '#ff7f7f'; // Фон при активации удаления
+
+        groupItem.addEventListener('click', () => {
+            const groupId = groupItem.getAttribute('data-group-id');
+            deleteGroupHandler(groupItem, groupId);
+        });
+
+        // Наведение на элементы li
+        groupItem.addEventListener('mouseover', () => {
+            groupItem.style.backgroundColor = '#ff4d4d';
+            groupItem.style.cursor = 'pointer';
+        });
+
+        groupItem.addEventListener('mouseout', () => {
+            groupItem.style.backgroundColor = '#ff7f7f';
+            groupItem.style.cursor = 'pointer';
+        });
+        // Обработка нажатия на элемент li
+        groupItem.addEventListener('mousedown', () => {
+            groupItem.style.backgroundColor = '#ff7f7f';
+            groupItem.style.cursor = 'pointer';
+        });
+
+        // При отпускании мыши, если элемент выбран для удаления
+        groupItem.addEventListener('mouseup', () => {
+            groupItem.style.backgroundColor = '#ff4d4d';
+            groupItem.style.cursor = 'pointer';
+        });
+    });
+    //  Сброс цветов после завершения удаления
+    document.addEventListener('deleteComplete', () => {
+        groupItems.forEach(groupItem => {
+            groupItem.style.backgroundColor = ''; // Возвращаем цвет к оригинальному из CSS
+            groupItem.style.cursor = '';
+        });
+    });
+}
+// Функция для отмены режима удаления
+function cancelDeleteMode() {
+    const groupItems = document.querySelectorAll('#groupList li');
+    groupItems.forEach(groupItem => {
+        groupItem.style.backgroundColor = ''; // Сброс цвета на исходный
+        groupItem.style.cursor = '';
+        // Удаление старого обработчика клика
+        const newGroupItem = groupItem.cloneNode(true);
+        groupItem.parentNode.replaceChild(newGroupItem, groupItem);
+
+        // Добавление нового обработчика клика
+        newGroupItem.addEventListener('click', () => {
+            const groupName = newGroupItem.textContent.trim(); // Получение названия группы
+            showExpenses(groupName);
+        });
+    });
+}
+// Вызов функции для загрузки групп после загрузки страницы
+document.addEventListener('DOMContentLoaded', () => {
+    const userId = localStorage.getItem('userId');
+    if (userId) {
+        getUserGroups(userId);
+    }
+});
+
+
 
 // // Добавление расхода
 // async function addExpense(group_id, description, amount, date, paid_by, shares) {
