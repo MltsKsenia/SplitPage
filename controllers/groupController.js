@@ -56,19 +56,19 @@ exports.addUserToGroup = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
-
-// Получение списка групп юзера
+//groupController.js
+// Получение групп пользователя
 exports.getUserGroups = async (req, res) => {
     const { userId } = req.params;
     try {
         console.log(`Fetching groups for user with ID: ${userId}`);
 
         const groups = await db('usergroups')
-            .join('groups', 'groups.id', 'usergroups.group_id') // Соединяем таблицы по group_id
-            .where('usergroups.user_id', userId) // Фильтруем по user_id
-            .select('groups.id', 'groups.name'); // Выбираем необходимые поля
+            .join('usergroups', 'groups.id', 'usergroups.group_id')
+            .where('usergroups.user_id', userId)
+            .select('groups.id', 'groups.name');
 
-        console.log('Groups fetched:', groups); // Лог данных
+        console.log('Groups fetched:', groups);
 
         res.status(200).json(groups);
     } catch (error) {
@@ -80,32 +80,18 @@ exports.getUserGroups = async (req, res) => {
 // Удаление группы
 exports.deleteGroup = async (req, res) => {
     const { groupId } = req.params;
-    console.log(`Deleting group with ID: ${groupId}`);
     try {
-        await db('groups').where('id', groupId).del(); // Удаление группы из таблицы групп
-        await db('usergroups').where('group_id', groupId).del(); // Удаление записей из таблицы usergroups
-
-        res.status(200).json({ message: 'Group successfully deleted' });
+        // Удаляем группу и связанные записи
+        await db('usergroups').where({ group_id: groupId }).del();
+        await db('expenseshares').whereIn('expense_id', db('expenses').select('id').where({ group_id: groupId })).del();
+        await db('expenses').where({ group_id: groupId }).del();
+        await db('groups').where({ id: groupId }).del();
+        res.status(200).json({ message: 'Group deleted' });
     } catch (error) {
-        console.error('Error deleting group:', error);
+        console.error('Error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 };
-
-// exports.deleteGroup = async (req, res) => {
-//     const { groupId } = req.params;
-//     try {
-//         // Удаляем группу и связанные записи
-//         await db('usergroups').where({ group_id: groupId }).del();
-//         await db('expenseshares').whereIn('expense_id', db('expenses').select('id').where({ group_id: groupId })).del();
-//         await db('expenses').where({ group_id: groupId }).del();
-//         await db('groups').where({ id: groupId }).del();
-//         res.status(200).json({ message: 'Group deleted' });
-//     } catch (error) {
-//         console.error('Error:', error);
-//         res.status(500).json({ message: 'Server error' });
-//     }
-// };
 
 // Получение баланса группы
 exports.getGroupBalance = async (req, res) => {
