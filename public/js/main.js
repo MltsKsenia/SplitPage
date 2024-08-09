@@ -1,9 +1,9 @@
-
+//main.js
 // Декорация страницы с группами и расходами
 document.getElementById('addGroupBtn').addEventListener('click', showCreateGroupModal);
 document.getElementById('addExpenseBtn').addEventListener('click', showAddExpenseModal);
-document.getElementById('deleteExpenseBtn').addEventListener('click', enableDeleteExpenses);
-document.getElementById('deleteGroupBtn').addEventListener('click', enableDeleteGroups);
+// document.getElementById('deleteExpenseBtn').addEventListener('click', enableDeleteExpenses);
+// document.getElementById('deleteGroupBtn').addEventListener('click', enableDeleteGroups);
 
 function showExpenses(groupName) {
     document.getElementById('selectedGroupName').textContent = groupName;
@@ -13,36 +13,36 @@ function showExpenses(groupName) {
     expenseList.innerHTML = '';
 }
 
-function enableDeleteExpenses() {
-    const expenseItems = document.querySelectorAll('#expenseList li');
-    expenseItems.forEach(expenseItem => {
-        expenseItem.style.backgroundColor = '#6dac95';
+// function enableDeleteExpenses() {
+//     const expenseItems = document.querySelectorAll('#expenseList li');
+//     expenseItems.forEach(expenseItem => {
+//         expenseItem.style.backgroundColor = '#6dac95';
 
-        expenseItem.addEventListener('click', () => {
-            expenseItem.remove();
-        });
+//         expenseItem.addEventListener('click', () => {
+//             expenseItem.remove();
+//         });
 
-        expenseItem.addEventListener('mouseover', () => {
-            expenseItem.style.backgroundColor = '#095b4d';
-            expenseItem.style.cursor = 'pointer';
-        });
+//         expenseItem.addEventListener('mouseover', () => {
+//             expenseItem.style.backgroundColor = '#095b4d';
+//             expenseItem.style.cursor = 'pointer';
+//         });
 
-        expenseItem.addEventListener('mouseout', () => {
-            expenseItem.style.backgroundColor = '#6dac95';
-            expenseItem.style.cursor = 'pointer';
-        });
+//         expenseItem.addEventListener('mouseout', () => {
+//             expenseItem.style.backgroundColor = '#6dac95';
+//             expenseItem.style.cursor = 'pointer';
+//         });
 
-        expenseItem.addEventListener('mousedown', () => {
-            expenseItem.style.backgroundColor = '#6dac95';
-            expenseItem.style.cursor = 'pointer';
-        });
+//         expenseItem.addEventListener('mousedown', () => {
+//             expenseItem.style.backgroundColor = '#6dac95';
+//             expenseItem.style.cursor = 'pointer';
+//         });
 
-        expenseItem.addEventListener('mouseup', () => {
-            expenseItem.style.backgroundColor = '#095b4d';
-            expenseItem.style.cursor = 'pointer';
-        });
-    });
-}
+//         expenseItem.addEventListener('mouseup', () => {
+//             expenseItem.style.backgroundColor = '#095b4d';
+//             expenseItem.style.cursor = 'pointer';
+//         });
+//     });
+// }
 
 function showCreateGroupModal() {
     document.getElementById('create-group-modal').style.display = 'flex';
@@ -58,7 +58,7 @@ function hideCreateModal() {
 }
 
 // Создание группы и добавление пользователя в группу
-async function createGroupAndAddUser(groupName, created_by, email) {
+async function createGroupAndAddUser(groupName, created_by, friendId) {
     try {
         // Создание группы
         const groupResponse = await fetch('/api/groups/create', {
@@ -67,7 +67,7 @@ async function createGroupAndAddUser(groupName, created_by, email) {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
-            body: JSON.stringify({ name: groupName, created_by })
+            body: JSON.stringify({ name: groupName, created_by, friendId }) // Передаем friendId здесь
         });
 
         const groupData = await groupResponse.json();
@@ -76,22 +76,9 @@ async function createGroupAndAddUser(groupName, created_by, email) {
 
             // Добавление пользователя в группу
             const groupId = groupData.group.id; // Предполагается, что API возвращает ID группы
-            const userResponse = await fetch(`/api/groups/${groupId}/addUser`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify({ email })
-            });
-
-            const userData = await userResponse.json();
-            if (userResponse.ok) {
-                alert('User added to the group successfully!');
-                window.location.reload();
-            } else {
-                alert(userData.message);
-            }
+            // Обновление интерфейса или другое действие
+            alert('User added to the group successfully!');
+            // window.location.reload();
         } else {
             alert(groupData.message);
         }
@@ -99,79 +86,26 @@ async function createGroupAndAddUser(groupName, created_by, email) {
         console.error('Error:', error);
     }
 }
+
 function createGroupHandler() {
     const groupName = document.getElementById('groupNameInput').value;
-    const friendEmail = document.getElementById('friendEmailInput').value;
-    const created_by = 'user_id'; // замените на текущего пользователя
+    const friendId = document.getElementById('friendIdInput').value;
+    const created_by = localStorage.getItem('userId');
 
-    if (groupName && friendEmail) {
+    if (groupName && friendId) {
         const groupList = document.getElementById('groupList');
         const groupItem = document.createElement('li');
-        groupItem.textContent = `${groupName} (${friendEmail})`;
+        groupItem.textContent = `${groupName} (${friendId})`;
 
         groupItem.addEventListener('click', () => showExpenses(groupName));
         groupList.appendChild(groupItem);
         document.getElementById('groupNameInput').value = '';
-        document.getElementById('friendEmailInput').value = '';
+        document.getElementById('friendIdInput').value = '';
         hideCreateModal();
-
         // Вызов асинхронной функции для создания группы и добавления пользователя
-        createGroupAndAddUser(groupName, created_by, friendEmail);
+        createGroupAndAddUser(groupName, created_by, friendId);
     } else {
-        alert('Please enter both group name and email.');
-    }
-}
-
-
-// Добавление расхода
-async function addExpense(group_id, description, amount, date, paid_by, shares) {
-    try {
-        const response = await fetch('/api/expenses/add', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify({ group_id, description, amount, date, paid_by, shares })
-        });
-
-        const data = await response.json();
-        if (response.ok) {
-            alert('Expense added successfully!');
-            window.location.reload();
-        } else {
-            alert(data.message);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-    }
-}
-
-function addExpenseHandler() {
-    const expenseName = document.getElementById('expenseName').value;
-    const amount = document.getElementById('amount').value;
-    const date = document.getElementById('expenseDate').value;
-    const paid_by = document.getElementById('paidBy').value;
-    const group_id = document.getElementById('groupId').value;
-    const shares = document.getElementById('shares').value.split('/').map(share => share.trim());
-
-    if (expenseName && amount && date && paid_by && group_id && shares.length > 0) {
-        const expenseList = document.getElementById('expenseList');
-        const expenseItem = document.createElement('li');
-        expenseItem.textContent = `${expenseName} (${amount})`;
-        expenseList.appendChild(expenseItem);
-        document.getElementById('expenseName').value = '';
-        document.getElementById('amount').value = '';
-        document.getElementById('expenseDate').value = '';
-        document.getElementById('paidBy').value = '';
-        document.getElementById('groupId').value = '';
-        document.getElementById('shares').value = '';
-        hideCreateModal();
-
-        // Вызов асинхронной функции
-        addExpense(group_id, expenseName, amount, date, paid_by, shares);
-    } else {
-        alert('Please enter all required fields.');
+        alert('Please enter both group name and friend ID.');
     }
 }
 // Получение групп пользователя
@@ -181,207 +115,105 @@ async function getUserGroups(userId) {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
 
-        const groups = await response.json();
-        if (response.ok) {
-            return groups;
-        } else {
-            alert(groups.message);
+        if (!response.ok) {
+            const errorMessage = await response.text();
+            throw new Error(`Error fetching groups: ${errorMessage}`);
         }
+
+        const userGroups = await response.json();
+        console.log('Groups fetched:', userGroups); // Лог для проверки данных
+
+        const groupList = document.getElementById('groupList');
+        groupList.innerHTML = ''; // Очищаем список перед добавлением
+
+        userGroups.forEach(userGroup => {
+            const groupItem = document.createElement('li');
+            groupItem.textContent = `${userGroup.name} (${userGroup.id})`;
+            groupItem.setAttribute('data-group-id', userGroup.id);
+            groupItem.addEventListener('click', () => showExpenses(userGroup.id, userGroup.name));
+            groupList.appendChild(groupItem);
+            console.log('Group item added:', groupItem); // Лог добавленных элементов
+        });
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error:', error.message);
+        alert('Failed to fetch groups: ' + error.message);
     }
 }
 
-// Получение расходов группы
-async function getGroupExpenses(groupId) {
-    try {
-        const response = await fetch(`/api/expenses/group/${groupId}`, {
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        });
+// Проверка токена и извлечение информации о пользователе
+document.addEventListener('DOMContentLoaded', () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+        try {
+            const decodedToken = jwt_decode(token);
+            console.log('Decoded Token:', decodedToken);  // Лог структуры токена
 
-        const expenses = await response.json();
-        if (response.ok) {
-            return expenses;
-        } else {
-            alert(expenses.message);
+            const userId = decodedToken.id; // Проверка ключа
+            console.log('User ID:', userId); // Лог user ID для проверки
+
+            // Убедитесь, что `userId` не равен `undefined`
+            if (userId) {
+                getUserGroups(userId);  // Вызов функции с правильным userId
+            } else {
+                console.error('Error: userId is undefined');
+            }
+        } catch (error) {
+            console.error('Error decoding token:', error);
         }
-    } catch (error) {
-        console.error('Error:', error);
+    } else {
+        console.error('No token found in localStorage');
+        window.location.href = '/login';
     }
-}
+});
 
-
-// Получение баланса группы
-async function getGroupBalance(groupId) {
-    try {
-        const response = await fetch(`/api/groups/${groupId}/balance`, {
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        });
-
-        const balance = await response.json();
-        if (response.ok) {
-            return balance;
-        } else {
-            alert(balance.message);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-    }
-}
-
-// Удаление группы
-async function deleteGroup(groupId) {
-    try {
-        const response = await fetch(`/api/groups/${groupId}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        });
-
-        const data = await response.json();
-        if (response.ok) {
-            alert('Group successfully deleted!');
-            window.location.reload();
-        } else {
-            alert(data.message);
-        }
-    } catch (error) {
-        console.error('Error with delete:', error);
-    }
-}
-
-function deleteGroupHandler(groupItem, groupId) {
-    if (confirm('Are you sure you want to delete this group?')) {
-        deleteGroup(groupId);
-        groupItem.remove();
-    }
-}
-
-function enableDeleteGroups() {
-    const groupItems = document.querySelectorAll('#groupList li');
-    groupItems.forEach(groupItem => {
-        groupItem.style.backgroundColor = '#ff7f7f';
-
-        groupItem.addEventListener('click', () => {
-            const groupId = groupItem.getAttribute('data-group-id');
-            deleteGroupHandler(groupItem, groupId);
-        });
-
-        groupItem.addEventListener('mouseover', () => {
-            groupItem.style.backgroundColor = '#ff4d4d';
-            groupItem.style.cursor = 'pointer';
-        });
-
-        groupItem.addEventListener('mouseout', () => {
-            groupItem.style.backgroundColor = '#ff7f7f';
-            groupItem.style.cursor = 'pointer';
-        });
-
-        groupItem.addEventListener('mousedown', () => {
-            groupItem.style.backgroundColor = '#ff7f7f';
-            groupItem.style.cursor = 'pointer';
-        });
-
-        groupItem.addEventListener('mouseup', () => {
-            groupItem.style.backgroundColor = '#ff4d4d';
-            groupItem.style.cursor = 'pointer';
-        });
-    });
-}
-// // Получение групп пользователя
-// async function getUserGroups(userId) {
+// // Добавление расхода
+// async function addExpense(group_id, description, amount, date, paid_by, shares) {
 //     try {
-//         const response = await fetch(`/api/groups/user/${userId}`, {
-//             headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+//         const response = await fetch('/api/expenses/add', {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json',
+//                 'Authorization': `Bearer ${localStorage.getItem('token')}`
+//             },
+//             body: JSON.stringify({ group_id, description, amount, date, paid_by, shares })
 //         });
 
-//         const groups = await response.json();
+//         const data = await response.json();
 //         if (response.ok) {
-//             const groupList = document.getElementById('groupList');
-//             groupList.innerHTML = '';
-//             groups.forEach(group => {
-//                 const groupItem = document.createElement('li');
-//                 groupItem.textContent = `${group.name} (${group.id})`;
-//                 groupItem.setAttribute('data-group-id', group.id);
-//                 groupItem.addEventListener('click', () => showExpenses(group.id, group.name));
-//                 groupList.appendChild(groupItem);
-//             });
+//             alert('Expense added successfully!');
+//             window.location.reload();
 //         } else {
-//             alert(groups.message);
+//             alert(data.message);
 //         }
 //     } catch (error) {
 //         console.error('Error:', error);
 //     }
 // }
 
-// // Получение расходов группы
-// async function getGroupExpenses(groupId) {
-//     try {
-//         const response = await fetch(`/api/expenses/group/${groupId}`, {
-//             headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-//         });
+// function addExpenseHandler() {
+//     const expenseName = document.getElementById('expenseName').value;
+//     const amount = document.getElementById('amount').value;
+//     const date = document.getElementById('expenseDate').value;
+//     const paid_by = document.getElementById('paidBy').value;
+//     const group_id = document.getElementById('groupId').value;
+//     const shares = document.getElementById('shares').value.split('/').map(share => share.trim());
 
-//         const expenses = await response.json();
-//         if (response.ok) {
-//             return expenses;
-//         } else {
-//             alert(expenses.message);
-//         }
-//     } catch (error) {
-//         console.error('Error:', error);
-//     }
-// }
+//     if (expenseName && amount && date && paid_by && group_id && shares.length > 0) {
+//         const expenseList = document.getElementById('expenseList');
+//         const expenseItem = document.createElement('li');
+//         expenseItem.textContent = `${expenseName} (${amount})`;
+//         expenseList.appendChild(expenseItem);
+//         document.getElementById('expenseName').value = '';
+//         document.getElementById('amount').value = '';
+//         document.getElementById('expenseDate').value = '';
+//         document.getElementById('paidBy').value = '';
+//         document.getElementById('groupId').value = '';
+//         document.getElementById('shares').value = '';
+//         hideCreateModal();
 
-// // Получение баланса группы
-// async function getGroupBalance(groupId) {
-//     try {
-//         const response = await fetch(`/api/groups/${groupId}/balance`, {
-//             headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-//         });
-
-//         const balance = await response.json();
-//         if (response.ok) {
-//             return balance;
-//         } else {
-//             alert(balance.message);
-//         }
-//     } catch (error) {
-//         console.error('Error:', error);
-//     }
-// }
-
-// // Обновление долгов
-// async function updateDebt(groupId) {
-//     try {
-//         const balance = await getGroupBalance(groupId);
-//         if (balance) {
-//             document.getElementById('groupBalance').textContent = `Balance: ${balance.total}`;
-//         } else {
-//             console.error('Balance data is invalid or undefined:', balance);
-//         }
-//     } catch (error) {
-//         console.error('Error:', error);
-//     }
-// }
-
-// // Проверка токена и извлечение информации о пользователе
-// document.addEventListener('DOMContentLoaded', () => {
-//     const token = localStorage.getItem('token');
-//     if (token) {
-//         const decodedToken = jwt_decode(token);
-//         const userId = decodedToken.user_id;
-
-//         // Получение групп пользователя при загрузке страницы
-//         getUserGroups(userId);
+//         // Вызов асинхронной функции
+//         addExpense(group_id, expenseName, amount, date, paid_by, shares);
 //     } else {
-//         window.location.href = '/login';
+//         alert('Please enter all required fields.');
 //     }
-// });
-
-// document.getElementById('createGroupBtn').addEventListener('click', createGroupHandler);
-// document.getElementById('createExpenseBtn').addEventListener('click', () => addExpenseHandler('you', 'split'));
-// document.getElementById('createFriendExpenseBtn').addEventListener('click', () => addExpenseHandler('friend', 'split'));
-// document.getElementById('fullExpenseBtn').addEventListener('click', () => addExpenseHandler('you', 'full'));
-// document.getElementById('fullFriendExpenseBtn').addEventListener('click', () => addExpenseHandler('friend', 'full'));
-// document.getElementById('cancelCreateGroupBtn').addEventListener('click', hideCreateModal);
-// document.getElementById('cancelAddExpenseBtn').addEventListener('click', hideCreateModal);
-
+// }
