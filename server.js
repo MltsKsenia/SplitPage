@@ -1,3 +1,4 @@
+//server.js
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
@@ -8,10 +9,6 @@ const app = express();
 const port = 3000;
 
 const db = require('./configdb/database');
-
-// const User = require('./models/user');
-// const Group = require('./models/group');
-// const Expense = require('./models/expense');
 
 const groupRoutes = require('./routes/groups');
 const expenseRoutes = require('./routes/expenses');

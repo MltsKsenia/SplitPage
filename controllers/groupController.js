@@ -56,36 +56,17 @@ exports.addUserToGroup = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
-
+//groupController.js
+// Получение групп пользователя
 exports.getUserGroups = async (req, res) => {
     const { userId } = req.params;
     try {
         console.log(`Fetching groups for user with ID: ${userId}`);
 
         const groups = await db('usergroups')
-            .join('groups', 'groups.id', 'usergroups.group_id') // Соединяем таблицы по group_id
-            .where('usergroups.user_id', userId) // Фильтруем по user_id
-            .select('groups.id', 'groups.name'); // Выбираем необходимые поля
-
-        console.log('Groups fetched:', groups); // Лог данных
-
-        res.status(200).json(groups);
-    } catch (error) {
-        console.error('Error fetching user groups:', error);
-        res.status(500).json({ message: 'Server error' });
-    }
-};
-
-exports.getUserGroups = async (req, res) => {
-    const { userId } = req.params;
-    try {
-        console.log(`Fetching groups for user with ID: ${userId}`);
-
-        const groups = await db('groups')
             .join('usergroups', 'groups.id', 'usergroups.group_id')
             .where('usergroups.user_id', userId)
             .select('groups.id', 'groups.name');
-
 
         console.log('Groups fetched:', groups);
 
