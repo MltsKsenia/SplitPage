@@ -9,7 +9,7 @@ router.post('/add', expenseController.addExpense);
 // Получение расходов группы
 router.get('/group/:groupId', expenseController.getGroupExpenses);
 
-// Получение расходов пользователя
-router.get('/user/:userId', expenseController.getUserExpenses);
+// Удаление транзакции
+router.delete('/:expenseId', expenseController.deleteExpense);
 
 module.exports = router;

@@ -12,58 +12,35 @@ exports.addExpense = async (req, res) => {
 
         res.status(201).json(newTransaction[0]);
     } catch (error) {
-        console.error('Ошибка при добавлении транзакции:', error);
-        res.status(500).json({ message: 'Ошибка сервера' });
+        console.error('Error with adding expense:', error);
+        res.status(500).json({ message: 'ServerError' });
     }
 };
 
-// Получение расходов группы
+// Get group expenses
 exports.getGroupExpenses = async (req, res) => {
     const { groupId } = req.params;
     try {
-        const expenses = await db('expenses')
-            .where({ group_id: groupId })
-            .select('id', 'description', 'amount', 'date', 'paid_by');
-        res.json(expenses);
+        const expenses = await db('transactions')
+            .where({ group_id: groupId });
+        res.status(200).json(expenses);
     } catch (error) {
-        console.error('Ошибка при получении расходов группы:', error);
-        res.status(500).json({ message: 'Ошибка сервера' });
+        console.error('Error with getting all group transactions', error);
+        res.status(500).json({ message: 'server error' });
     }
 };
 
-// Получение расходов пользователя
-exports.getUserExpenses = async (req, res) => {
-    const { userId } = req.params;
+// Delete Expense
+
+exports.deleteExpense = async (req, res) => {
+    
+    const { expenseId } = req.params;
+    
     try {
-        const expenses = await db('expenseshares')
-            .join('expenses', 'epenseshares.expense_id', 'Expenses.id')
-            .where('expenseShares.user_id', userId)
-            .select('expenses.id', 'expenses.description', 'Expenses.amount', 'Expenses.date', 'Expenses.paid_by');
-        res.json(expenses);
+        await db('transactions').where('id', expenseId).del();
+        res.status(200).json({ message: 'Expense deleted' });
     } catch (error) {
-        console.error('Ошибка при получении расходов пользователя:', error);
-        res.status(500).json({ message: 'Ошибка сервера' });
-    }
-};
-
-// Разделение расходов
-exports.splitExpense = async (req, res) => {
-    const { expense_id, shares } = req.body;
-    try {
-        // Проверяем, существует ли расход
-        const expense = await db('expenses').where({ id: expense_id }).first();
-        if (!expense) {
-            return res.status(404).json({ message: 'Расход не найден' });
-        }
-
-        // Обновляем доли пользователей
-        for (const share of shares) {
-            await db('expenseshares').update({ amount: share.amount }).where({ expense_id, user_id: share.user_id });
-        }
-
-        res.status(200).json({ message: 'Расход разделен' });
-    } catch (error) {
-        console.error('Ошибка при разделении расхода:', error);
-        res.status(500).json({ message: 'Ошибка сервера' });
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Server Error' });
     }
 };
