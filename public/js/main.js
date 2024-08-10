@@ -405,4 +405,43 @@ function addExpenseHandler(paidBy, splitType) {
 //             expenseItem.style.cursor = 'pointer';
 //         });
 //     });
+=======
+//         const data = await response.json();
+//         if (response.ok) {
+//             alert('Expense added successfully!');
+//             window.location.reload();
+//         } else {
+//             alert(data.message);
+//         }
+//     } catch (error) {
+//         console.error('Error:', error);
+//     }
+// }
+
+// function addExpenseHandler() {
+//     const expenseName = document.getElementById('expenseName').value;
+//     const amount = document.getElementById('amount').value;
+//     const date = document.getElementById('expenseDate').value;
+//     const paid_by = document.getElementById('paidBy').value;
+//     const group_id = document.getElementById('groupId').value;
+//     const shares = document.getElementById('shares').value.split('/').map(share => share.trim());
+
+//     if (expenseName && amount && date && paid_by && group_id && shares.length > 0) {
+//         const expenseList = document.getElementById('expenseList');
+//         const expenseItem = document.createElement('li');
+//         expenseItem.textContent = `${expenseName} (${amount})`;
+//         expenseList.appendChild(expenseItem);
+//         document.getElementById('expenseName').value = '';
+//         document.getElementById('amount').value = '';
+//         document.getElementById('expenseDate').value = '';
+//         document.getElementById('paidBy').value = '';
+//         document.getElementById('groupId').value = '';
+//         document.getElementById('shares').value = '';
+//         hideCreateModal();
+
+//         // Вызов асинхронной функции
+//         addExpense(group_id, expenseName, amount, date, paid_by, shares);
+//     } else {
+//         alert('Please enter all required fields.');
+//     }
 // }
