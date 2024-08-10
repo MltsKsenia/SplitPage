@@ -1,5 +1,6 @@
 //main.js
 
+
 // Calling a function to load groups after the page has loaded
 document.addEventListener('DOMContentLoaded', () => {
     const userId = localStorage.getItem('userId');
@@ -8,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+
 function hideCreateModal() {
     document.getElementById('create-group-modal').style.display = 'none';
     document.getElementById('add-expense-modal').style.display = 'none';
@@ -15,9 +17,11 @@ function hideCreateModal() {
 
 // Creating a group and adding a user to the group
 document.getElementById('addGroupBtn').addEventListener('click', showCreateGroupModal);
+
 function showCreateGroupModal() {
     document.getElementById('create-group-modal').style.display = 'flex';
 }
+
 async function createGroupAndAddUser(groupName, created_by, friendId) {
     try {
         // Creating a group
@@ -369,6 +373,77 @@ function addExpenseHandler(paidBy, splitType) {
     // Вызов асинхронной функции для добавления в базу данных
     addExpense(group_id, expenseName, amount, date, paidBy === 'you' ? currentUser : friendId, shares);
 
+
+//add Expense
+
+async function addExpenseHandler(payer, type) {
+    const description = document.getElementById('expenseName').value;
+    const amount = parseFloat(document.getElementById('amount').value);
+    const date = document.getElementById('expenseDate').value;
+    const userId = localStorage.getItem('userId');
+    const friendId = document.getElementById('friendIdInput').value;
+
+    if (!selectedGroupId || !description || isNaN(amount) || !date) {
+        alert('Please fill in all fields');
+        return;
+    }
+
+    let payer_id, receiver_id;
+    if (payer === 'you') {
+        payer_id = userId;
+        receiver_id = friendId;
+    } else {
+        payer_id = friendId;
+        receiver_id = userId;
+    }
+
+    try {
+        const response = await fetch('/api/transactions/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({
+                group_id: selectedGroupId,
+                description,
+                amount,
+                date,
+                payer_id,
+                receiver_id,
+                type: type === 'split' ? 'owed' : 'debt'
+            })
+        });
+
+        if (response.ok) {
+            alert('Expense added successfully!');
+            loadTransactions(selectedGroupId);
+            hideCreateModal();
+        } else {
+            const data = await response.json();
+            alert(data.message || 'Failed to add expense');
+        }
+    } catch (error) {
+        console.error('Error adding expense:', error);
+        alert('An error occurred. Please try again later.');
+    }
+}
+
+
+
+
+
+// // Добавление расхода
+// async function addExpense(group_id, description, amount, date, paid_by, shares) {
+//     try {
+//         const response = await fetch('/api/expenses/add', {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json',
+//                 'Authorization': `Bearer ${localStorage.getItem('token')}`
+//             },
+//             body: JSON.stringify({ group_id, description, amount, date, paid_by, shares })
+
     hideCreateModal(); // Закрыть модальное окно
 }
 
@@ -398,6 +473,7 @@ function addExpenseHandler(paidBy, splitType) {
 //         expenseItem.addEventListener('mousedown', () => {
 //             expenseItem.style.backgroundColor = '#6dac95';
 //             expenseItem.style.cursor = 'pointer';
+
 //         });
 
 //         expenseItem.addEventListener('mouseup', () => {
