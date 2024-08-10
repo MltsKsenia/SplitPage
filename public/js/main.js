@@ -3,6 +3,7 @@
 // document.getElementById('addExpenseBtn').addEventListener('click', showAddExpenseModal);
 // document.getElementById('deleteExpenseBtn').addEventListener('click', enableDeleteExpenses);
 
+
 function showExpenses(groupName) {
     document.getElementById('selectedGroupName').textContent = groupName;
     document.getElementById('addExpenseBtn').style.display = 'block';
@@ -53,9 +54,11 @@ function hideCreateModal() {
 
 // Создание группы и добавление пользователя в группу
 document.getElementById('addGroupBtn').addEventListener('click', showCreateGroupModal);
+
 function showCreateGroupModal() {
     document.getElementById('create-group-modal').style.display = 'flex';
 }
+
 async function createGroupAndAddUser(groupName, created_by, friendId) {
     try {
         // Создание группы
@@ -275,6 +278,65 @@ document.addEventListener('DOMContentLoaded', () => {
         getUserGroups(userId);
     }
 });
+
+
+
+//add Expense
+
+async function addExpenseHandler(payer, type) {
+    const description = document.getElementById('expenseName').value;
+    const amount = parseFloat(document.getElementById('amount').value);
+    const date = document.getElementById('expenseDate').value;
+    const userId = localStorage.getItem('userId');
+    const friendId = document.getElementById('friendIdInput').value;
+
+    if (!selectedGroupId || !description || isNaN(amount) || !date) {
+        alert('Please fill in all fields');
+        return;
+    }
+
+    let payer_id, receiver_id;
+    if (payer === 'you') {
+        payer_id = userId;
+        receiver_id = friendId;
+    } else {
+        payer_id = friendId;
+        receiver_id = userId;
+    }
+
+    try {
+        const response = await fetch('/api/transactions/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({
+                group_id: selectedGroupId,
+                description,
+                amount,
+                date,
+                payer_id,
+                receiver_id,
+                type: type === 'split' ? 'owed' : 'debt'
+            })
+        });
+
+        if (response.ok) {
+            alert('Expense added successfully!');
+            loadTransactions(selectedGroupId);
+            hideCreateModal();
+        } else {
+            const data = await response.json();
+            alert(data.message || 'Failed to add expense');
+        }
+    } catch (error) {
+        console.error('Error adding expense:', error);
+        alert('An error occurred. Please try again later.');
+    }
+}
+
+
 
 
 

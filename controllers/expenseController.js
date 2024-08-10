@@ -1,33 +1,18 @@
 // controllers/expenseController.js
 const db = require('../configdb/database');
 
-// Добавление нового расхода
+// Add new expense
 exports.addExpense = async (req, res) => {
-    const { group_id, description, amount, date, paid_by, shares } = req.body;
+    const { group_id, description, amount, date, payer_id, receiver_id, type } = req.body;
+
     try {
-        // Проверяем, существует ли группа
-        const group = await db('groups').where({ id: group_id }).first();
-        if (!group) {
-            return res.status(404).json({ message: 'Группа не найдена' });
-        }
+        const newTransaction = await db('transactions')
+            .insert({ group_id, description, amount, date, payer_id, receiver_id, type })
+            .returning('*');
 
-        // Проверяем, существует ли пользователь, который оплатил
-        const payer = await db('users').where({ id: paid_by }).first();
-        if (!payer) {
-            return res.status(404).json({ message: 'Пользователь, который оплатил, не найден' });
-        }
-
-        // Добавляем расход в базу данных
-        const newExpense = await db('expenses').insert({ group_id, description, amount, date, paid_by }).returning('*');
-
-        // Добавляем доли для каждого пользователя
-        for (const share of shares) {
-            await db('expenseshares').insert({ expense_id: newExpense[0].id, user_id: share.user_id, amount: share.amount });
-        }
-
-        res.status(201).json(newExpense);
+        res.status(201).json(newTransaction[0]);
     } catch (error) {
-        console.error('Ошибка при добавлении расхода:', error);
+        console.error('Ошибка при добавлении транзакции:', error);
         res.status(500).json({ message: 'Ошибка сервера' });
     }
 };
