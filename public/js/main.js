@@ -351,6 +351,7 @@ function addExpenseHandler(paidBy, splitType) {
         }
     }
 
+
     const expenseTableBody = document.getElementById('expenseTableBody');
     const row = document.createElement('tr');
 
@@ -372,10 +373,9 @@ function addExpenseHandler(paidBy, splitType) {
 
     // Вызов асинхронной функции для добавления в базу данных
     addExpense(group_id, expenseName, amount, date, paidBy === 'you' ? currentUser : friendId, shares);
-
+}
 
 //add Expense
-
 async function addExpenseHandler(payer, type) {
     const description = document.getElementById('expenseName').value;
     const amount = parseFloat(document.getElementById('amount').value);
@@ -444,8 +444,8 @@ async function addExpenseHandler(payer, type) {
 //             },
 //             body: JSON.stringify({ group_id, description, amount, date, paid_by, shares })
 
-    hideCreateModal(); // Закрыть модальное окно
-}
+//     hideCreateModal(); // Закрыть модальное окно
+// }
 
 
 //Удаление расхода
@@ -481,7 +481,7 @@ async function addExpenseHandler(payer, type) {
 //             expenseItem.style.cursor = 'pointer';
 //         });
 //     });
-=======
+
 //         const data = await response.json();
 //         if (response.ok) {
 //             alert('Expense added successfully!');
@@ -520,4 +520,3 @@ async function addExpenseHandler(payer, type) {
 //     } else {
 //         alert('Please enter all required fields.');
 //     }
-// }

@@ -113,7 +113,6 @@ exports.getTransactions = async (req, res) => {
         console.error('Error:', error);
         res.status(500).json({ message: 'Server error' });
     }
-
 };
 
 // Добавление нового расхода
