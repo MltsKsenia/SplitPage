@@ -92,45 +92,49 @@ exports.deleteGroup = async (req, res) => {
     }
 };
 
-// exports.deleteGroup = async (req, res) => {
-//     const { groupId } = req.params;
-//     try {
-//         // Удаляем группу и связанные записи
-//         await db('usergroups').where({ group_id: groupId }).del();
-//         await db('expenseshares').whereIn('expense_id', db('expenses').select('id').where({ group_id: groupId })).del();
-//         await db('expenses').where({ group_id: groupId }).del();
-//         await db('groups').where({ id: groupId }).del();
-//         res.status(200).json({ message: 'Group deleted' });
-//     } catch (error) {
-//         console.error('Error:', error);
-//         res.status(500).json({ message: 'Server error' });
-//     }
-// };
-
-// Получение баланса группы
-exports.getGroupBalance = async (req, res) => {
+// Получение всех транзакций для группы
+exports.getTransactions = async (req, res) => {
     const { groupId } = req.params;
     try {
-        const expenses = await db('expenses')
+        const transactions = await db('transactions')
             .where({ group_id: groupId })
-            .select('id', 'amount', 'paid_by');
+            .select('description', 'amount', 'payer_id', 'receiver_id', 'type', 'date');
 
-        const balances = {};
+        const formattedTransactions = transactions.map(transaction => {
+            return {
+                ...transaction,
+                amount: transaction.amount, // Оставляем форматирование суммы, если необходимо
+                total_amount: transaction.amount // Убедитесь, что total_amount правильно отображается
+            };
+        });
 
-        for (const expense of expenses) {
-            const shares = await db('expenseshares').where({ expense_id: expense.id });
-
-            for (const share of shares) {
-                if (share.user_id !== expense.paid_by) {
-                    balances[share.user_id] = (balances[share.user_id] || 0) + share.amount;
-                    balances[expense.paid_by] = (balances[expense.paid_by] || 0) - share.amount;
-                }
-            }
-        }
-
-        res.json(balances);
+        res.json(formattedTransactions);
     } catch (error) {
         console.error('Error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// Добавление нового расхода
+exports.addExpense = async (req, res) => {
+    const { description, amount, date, payer_id, receiver_id, type } = req.body;
+    const { groupId } = req.params; // Получаем groupId из параметров URL
+
+    try {
+        // Добавление записи в таблицу transactions
+        await db('transactions').insert({
+            group_id: groupId, // Используем groupId из параметров URL
+            description,
+            amount,
+            date,
+            payer_id,
+            receiver_id,
+            type
+        });
+
+        res.status(201).json({ message: 'Expense added successfully' });
+    } catch (error) {
+        console.error('Error adding expense:', error);
         res.status(500).json({ message: 'Server error' });
     }
 };

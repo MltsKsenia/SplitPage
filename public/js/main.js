@@ -242,70 +242,135 @@ document.getElementById('deleteGroupBtn').addEventListener('click', () => {
 });
 
 // Functions for displaying expenses
-function showExpenses(groupName) {
-    document.getElementById('selectedGroupName').textContent = groupName;
+function showExpenses(groupId) {
+    document.getElementById('selectedGroupName').textContent = `Group ID: ${groupId}`;
     document.getElementById('addExpenseBtn').style.display = 'block';
     document.getElementById('deleteExpenseBtn').style.display = 'block';
-    const expenseList = document.getElementById('expenseList');
-    expenseList.innerHTML = '';
+    const expenseTableBody = document.getElementById('expenseTableBody');
+    expenseTableBody.innerHTML = '';
+
+    // Получение и отображение расходов
+    fetch(`/api/transactions/${groupId}`)
+        .then(response => response.json())
+        .then(data => {
+            data.forEach(transaction => {
+                const row = document.createElement('tr');
+
+                const descriptionCell = document.createElement('td');
+                descriptionCell.textContent = transaction.description;
+                row.appendChild(descriptionCell);
+
+                const totalAmountCell = document.createElement('td');
+                totalAmountCell.textContent = transaction.amount;
+                row.appendChild(totalAmountCell);
+
+                const owedOrDebtCell = document.createElement('td');
+                const amountColor = transaction.type === 'owed' ? 'green' : 'red';
+                const amountLabel = transaction.type === 'owed' ? 'Owed' : 'Debt';
+                owedOrDebtCell.innerHTML = `<b style="color: ${amountColor};">${amountLabel}: ${transaction.amount}</b>`;
+                row.appendChild(owedOrDebtCell);
+
+                expenseTableBody.appendChild(row);
+            });
+        })
+        .catch(error => console.error('Error:', error));
 }
+
 function showAddExpenseModal() {
     document.getElementById('add-expense-modal').style.display = 'flex';
 }
 
-// // Добавление расхода
-// document.getElementById('addExpenseBtn').addEventListener('click', showAddExpenseModal);
+// Добавление расхода
+document.getElementById('addExpenseBtn').addEventListener('click', showAddExpenseModal);
 
-// async function addExpense(group_id, description, amount, date, paid_by, shares) {
-//     try {
-//         const response = await fetch('/api/expenses/add', {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json',
-//                 'Authorization': `Bearer ${localStorage.getItem('token')}`
-//             },
-//             body: JSON.stringify({ group_id, description, amount, date, paid_by, shares })
-//         });
+async function addExpense(group_id, description, amount, date, paid_by, shares) {
+    try {
+        const response = await fetch('/api/transactions/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({ group_id, description, amount, date, paid_by, shares })
+        });
 
-//         const data = await response.json();
-//         if (response.ok) {
-//             alert('Expense added successfully!');
-//             window.location.reload();
-//         } else {
-//             alert(data.message);
-//         }
-//     } catch (error) {
-//         console.error('Error:', error);
-//     }
-// }
+        const data = await response.json();
+        if (response.ok) {
+            alert('Expense added successfully!');
+            window.location.reload();
+        } else {
+            alert(data.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
 
-// function addExpenseHandler() {
-//     const expenseName = document.getElementById('expenseName').value;
-//     const amount = document.getElementById('amount').value;
-//     const date = document.getElementById('expenseDate').value;
-//     const paid_by = document.getElementById('paidBy').value;
-//     const group_id = document.getElementById('groupId').value;
-//     const shares = document.getElementById('shares').value.split('/').map(share => share.trim());
 
-//     if (expenseName && amount && date && paid_by && group_id && shares.length > 0) {
-//         const expenseList = document.getElementById('expenseList');
-//         const expenseItem = document.createElement('li');
-//         expenseItem.textContent = `${expenseName} (${amount})`;
-//         expenseList.appendChild(expenseItem);
-//         document.getElementById('expenseName').value = '';
-//         document.getElementById('amount').value = '';
-//         document.getElementById('expenseDate').value = '';
-//         document.getElementById('paidBy').value = '';
-//         document.getElementById('groupId').value = '';
-//         document.getElementById('shares').value = '';
-//         hideCreateModal();
+function addExpenseHandler(paidBy, splitType) {
+    const expenseName = document.getElementById('expenseName').value.trim();
+    const amount = parseFloat(document.getElementById('amount').value);
+    const date = document.getElementById('expenseDate').value;
+    const group_id = document.getElementById('groupId').value.trim();
 
-//         // Вызов асинхронной функции
-//         addExpense(group_id, expenseName, amount, date, paid_by, shares);
-//     } else {
-//         alert('Please enter all required fields.');
-//     }
-// }
+    if (!expenseName || isNaN(amount) || !date || !group_id) {
+        alert('Please enter all required fields.');
+        return;
+    }
+
+    // Получаем friendId и проверяем его наличие
+    const friendId = document.getElementById('friendId') ? document.getElementById('friendId').value.trim() : null;
+    if (!friendId) {
+        console.log('Friend ID is required.');
+        return;
+    }
+
+    let shares = [];
+    const currentUser = localStorage.getItem('userId');
+
+    if (splitType === 'split') {
+        shares = [
+            { user_id: currentUser, amount: amount / 2, type: 'owed' },
+            { user_id: friendId, amount: amount / 2, type: 'debt' }
+        ];
+    } else if (splitType === 'full') {
+        if (paidBy === 'you') {
+            shares = [
+                { user_id: currentUser, amount: amount, type: 'owed' },
+                { user_id: friendId, amount: amount, type: 'debt' }
+            ];
+        } else {
+            shares = [
+                { user_id: currentUser, amount: amount, type: 'debt' },
+                { user_id: friendId, amount: amount, type: 'owed' }
+            ];
+        }
+    }
+
+    const expenseTableBody = document.getElementById('expenseTableBody');
+    const row = document.createElement('tr');
+
+    const descriptionCell = document.createElement('td');
+    descriptionCell.textContent = expenseName;
+    row.appendChild(descriptionCell);
+
+    const totalAmountCell = document.createElement('td');
+    totalAmountCell.textContent = amount;
+    row.appendChild(totalAmountCell);
+
+    const owedOrDebtCell = document.createElement('td');
+    const amountColor = splitType === 'split' ? 'green' : 'red';
+    const amountLabel = splitType === 'split' ? 'Owed' : 'Debt';
+    owedOrDebtCell.innerHTML = `<b style="color: ${amountColor};">${amountLabel}: ${amount}</b>`;
+    row.appendChild(owedOrDebtCell);
+
+    expenseTableBody.appendChild(row);
+
+    // Вызов асинхронной функции для добавления в базу данных
+    addExpense(group_id, expenseName, amount, date, paidBy === 'you' ? currentUser : friendId, shares);
+
+    hideCreateModal(); // Закрыть модальное окно
+}
 
 
 //Удаление расхода
