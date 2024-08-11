@@ -247,37 +247,48 @@ document.getElementById('deleteGroupBtn').addEventListener('click', () => {
 
 // Functions for displaying expenses
 function showExpenses(groupId) {
+    document.getElementById('groupId').value = groupId;
     document.getElementById('selectedGroupName').textContent = `Group ID: ${groupId}`;
     document.getElementById('addExpenseBtn').style.display = 'block';
     document.getElementById('deleteExpenseBtn').style.display = 'block';
+    // expenseTableBody.innerHTML = '';
+
+    // Получение и отображение расходов
+    fetch(`/api/expenses/group/${groupId}`)
+        .then(response => response.json())
+        .then(data => {
+            data.forEach(transaction => {
+                if (data.friendId) {
+                    document.getElementById('friendId').value = data.friendId;
+                } else {
+                    console.error('Friend ID not found');
+                }
+            });
+        })
+        .catch(error => console.error('Error retrieving friend ID:', error));
+
     const expenseTableBody = document.getElementById('expenseTableBody');
     expenseTableBody.innerHTML = '';
 
     // Получение и отображение расходов
-    fetch(`/api/transactions/${groupId}`)
+    fetch(`/api/expenses/group/${groupId}`)
         .then(response => response.json())
         .then(data => {
             data.forEach(transaction => {
                 const row = document.createElement('tr');
 
-                const descriptionCell = document.createElement('td');
-                descriptionCell.textContent = transaction.description;
-                row.appendChild(descriptionCell);
-
-                const totalAmountCell = document.createElement('td');
-                totalAmountCell.textContent = transaction.amount;
-                row.appendChild(totalAmountCell);
-
-                const owedOrDebtCell = document.createElement('td');
-                const amountColor = transaction.type === 'owed' ? 'green' : 'red';
-                const amountLabel = transaction.type === 'owed' ? 'Owed' : 'Debt';
-                owedOrDebtCell.innerHTML = `<b style="color: ${amountColor};">${amountLabel}: ${transaction.amount}</b>`;
-                row.appendChild(owedOrDebtCell);
-
+                row.innerHTML = `
+                    <td>${transaction.description}</td>
+                    <td>${transaction.date}</td>
+                    <td>${transaction.amount}</td>
+                    <td><b style="color: ${transaction.type === 'owed' ? 'green' : 'red'};">
+                        ${transaction.type === 'owed' ? 'Owed' : 'Debt'}: ${transaction.amount}
+                    </b></td>
+                `;
                 expenseTableBody.appendChild(row);
             });
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => console.error('Error retrieving expenses:', error));
 }
 
 function showAddExpenseModal() {
@@ -287,15 +298,15 @@ function showAddExpenseModal() {
 // Добавление расхода
 document.getElementById('addExpenseBtn').addEventListener('click', showAddExpenseModal);
 
-async function addExpense(group_id, description, amount, date, paid_by, shares) {
+async function addExpense(group_id, description, amount, date, payer_id, receiver_id, type) {
     try {
-        const response = await fetch('/api/transactions/add', {
+        const response = await fetch('/api/expenses/add', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
-            body: JSON.stringify({ group_id, description, amount, date, paid_by, shares })
+            body: JSON.stringify({ group_id, description, amount, date, payer_id, receiver_id, type })
         });
 
         const data = await response.json();
@@ -310,139 +321,97 @@ async function addExpense(group_id, description, amount, date, paid_by, shares) 
     }
 }
 
-
-function addExpenseHandler(paidBy, splitType) {
+// Обработчик добавления расхода
+async function addExpenseHandler(paidBy, splitType) {
     const expenseName = document.getElementById('expenseName').value.trim();
     const amount = parseFloat(document.getElementById('amount').value);
     const date = document.getElementById('expenseDate').value;
     const group_id = document.getElementById('groupId').value.trim();
+    const friendId = document.getElementById('friendId').value.trim();
+    const currentUser = localStorage.getItem('userId');
 
-    if (!expenseName || isNaN(amount) || !date || !group_id) {
+    if (!expenseName || isNaN(amount) || !date || !group_id || !friendId) {
         alert('Please enter all required fields.');
         return;
     }
 
-    // Получаем friendId и проверяем его наличие
-    const friendId = document.getElementById('friendId') ? document.getElementById('friendId').value.trim() : null;
-    if (!friendId) {
-        console.log('Friend ID is required.');
-        return;
-    }
-
     let shares = [];
-    const currentUser = localStorage.getItem('userId');
-
     if (splitType === 'split') {
-        shares = [
-            { user_id: currentUser, amount: amount / 2, type: 'owed' },
-            { user_id: friendId, amount: amount / 2, type: 'debt' }
-        ];
+        if (paidBy === 'you') {
+            shares = [
+                { user_id: currentUser, amount: amount / 2, type: 'owed' },
+                { user_id: friendId, amount: amount / 2, type: 'debt' }
+            ];
+        } else {
+            shares = [
+                { user_id: friendId, amount: amount / 2, type: 'owed' },
+                { user_id: currentUser, amount: amount / 2, type: 'debt' }
+            ];
+        }
     } else if (splitType === 'full') {
         if (paidBy === 'you') {
             shares = [
                 { user_id: currentUser, amount: amount, type: 'owed' },
-                { user_id: friendId, amount: amount, type: 'debt' }
+                { user_id: friendId, amount: 0, type: 'debt' }
             ];
         } else {
             shares = [
-                { user_id: currentUser, amount: amount, type: 'debt' },
-                { user_id: friendId, amount: amount, type: 'owed' }
+                { user_id: friendId, amount: amount, type: 'owed' },
+                { user_id: currentUser, amount: 0, type: 'debt' }
             ];
         }
     }
 
+    try {
+        const response = await fetch('/api/expenses/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({ group_id, description: expenseName, amount, date, payer_id: paidBy === 'you' ? currentUser : friendId, receiver_id: paidBy === 'you' ? friendId : currentUser, type: shares[0].type })
+        });
 
+        const data = await response.json();
+        if (response.ok) {
+            alert('Expense added successfully!');
+            addExpenseToTable(data);
+        } else {
+            alert(data.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+function addExpenseToTable(expense) {
     const expenseTableBody = document.getElementById('expenseTableBody');
     const row = document.createElement('tr');
 
     const descriptionCell = document.createElement('td');
-    descriptionCell.textContent = expenseName;
+    descriptionCell.textContent = expense.description;
     row.appendChild(descriptionCell);
 
+    const dateCell = document.createElement('td');
+    dateCell.textContent = expense.date;
+    row.appendChild(dateCell);
+
     const totalAmountCell = document.createElement('td');
-    totalAmountCell.textContent = amount;
+    totalAmountCell.textContent = expense.amount;
     row.appendChild(totalAmountCell);
 
     const owedOrDebtCell = document.createElement('td');
-    const amountColor = splitType === 'split' ? 'green' : 'red';
-    const amountLabel = splitType === 'split' ? 'Owed' : 'Debt';
-    owedOrDebtCell.innerHTML = `<b style="color: ${amountColor};">${amountLabel}: ${amount}</b>`;
+    const amountColor = expense.type === 'owed' ? 'green' : 'red';
+    const amountLabel = expense.type === 'owed' ? 'Owed' : 'Debt';
+    owedOrDebtCell.innerHTML = `<b style="color: ${amountColor};">${amountLabel}: ${expense.amount}</b>`;
     row.appendChild(owedOrDebtCell);
 
+    const totalCreditCell = document.createElement('td');
+    totalCreditCell.textContent = expense.amount; // Здесь можно добавить расчет, если нужно
+    row.appendChild(totalCreditCell);
+
     expenseTableBody.appendChild(row);
-
-    // Вызов асинхронной функции для добавления в базу данных
-    addExpense(group_id, expenseName, amount, date, paidBy === 'you' ? currentUser : friendId, shares);
 }
-
-//add Expense
-// async function addExpenseHandler(payer, type) {
-//     const description = document.getElementById('expenseName').value;
-//     const amount = parseFloat(document.getElementById('amount').value);
-//     const date = document.getElementById('expenseDate').value;
-//     const userId = localStorage.getItem('userId');
-//     const friendId = document.getElementById('friendIdInput').value;
-
-//     if (!selectedGroupId || !description || isNaN(amount) || !date) {
-//         alert('Please fill in all fields');
-//         return;
-//     }
-
-//     let payer_id, receiver_id;
-//     if (payer === 'you') {
-//         payer_id = userId;
-//         receiver_id = friendId;
-//     } else {
-//         payer_id = friendId;
-//         receiver_id = userId;
-//     }
-
-//     try {
-//         const response = await fetch('/api/transactions/add', {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json',
-//                 'Authorization': `Bearer ${localStorage.getItem('token')}`
-//             },
-//             body: JSON.stringify({
-//                 group_id: selectedGroupId,
-//                 description,
-//                 amount,
-//                 date,
-//                 payer_id,
-//                 receiver_id,
-//                 type: type === 'split' ? 'owed' : 'debt'
-//             })
-//         });
-
-//         if (response.ok) {
-//             alert('Expense added successfully!');
-//             loadTransactions(selectedGroupId);
-//             hideCreateModal();
-//         } else {
-//             const data = await response.json();
-//             alert(data.message || 'Failed to add expense');
-//         }
-//     } catch (error) {
-//         console.error('Error adding expense:', error);
-//         alert('An error occurred. Please try again later.');
-//     }
-// }
-
-// // Добавление расхода
-// async function addExpense(group_id, description, amount, date, paid_by, shares) {
-//     try {
-//         const response = await fetch('/api/expenses/add', {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json',
-//                 'Authorization': `Bearer ${localStorage.getItem('token')}`
-//             },
-//             body: JSON.stringify({ group_id, description, amount, date, paid_by, shares })
-
-//     hideCreateModal(); // Закрыть модальное окно
-// }
-
 
 //Удаление расхода
 // document.getElementById('deleteExpenseBtn').addEventListener('click', enableDeleteExpenses);
