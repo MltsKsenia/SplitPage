@@ -43,15 +43,15 @@
                 <thead>
                     <tr>
                         <th>Description</th>
+                        <th>Date</th>
                         <th>Total Amount</th>
-                        <th>Owed/Debt</th>
+                        <th>Owed or Debt</th>
+                        <th>Total credit</th>
                     </tr>
                 </thead>
                 <tbody id="expenseTableBody">
                 </tbody>
             </table>
-            <ul id="expenseList">
-            </ul>
             <span id="debtValue">0</span>
         </div>
     </div>
@@ -71,6 +71,7 @@
         <input type="number" id="amount" placeholder="Amount">
         <input type="date" id="expenseDate" placeholder="Date" value="${new Date().toISOString().split('T')[0]}">
         <input type="hidden" id="groupId">
+        <input type="hidden" id="friendId">
         <div>
             <!-- current user paid 100% and friend id debt is 50% -->
             <button onclick="addExpenseHandler('you', 'split')">You paid, split equally</button>
