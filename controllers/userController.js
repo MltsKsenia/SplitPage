@@ -78,3 +78,24 @@ exports.updateUserProfile = async (req, res) => {
         res.status(500).json({ message: 'Ошибка сервера' });
     }
 };
+
+// Получение списка пользователей для конкретной группы
+exports.getGroupUsers = async (req, res) => {
+    const { groupId } = req.params;
+    try {
+        // Запрос к таблице usergroups, чтобы получить всех пользователей для данной группы
+        const users = await db('usergroups')
+            .join('users', 'usergroups.user_id', '=', 'users.id') // Соединяем таблицу usergroups с users
+            .select('users.id', 'users.name') // Выбираем нужные поля из таблицы users
+            .where('usergroups.group_id', groupId); // Фильтруем по group_id
+
+        if (users.length === 0) {
+            return res.status(404).json({ message: 'No users found for this group' });
+        }
+
+        res.status(200).json(users);
+    } catch (error) {
+        console.error('Error retrieving users for group:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};

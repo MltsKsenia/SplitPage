@@ -15,4 +15,7 @@ router.get('/:userId', userController.getUserProfile);
 // Обновление профиля пользователя
 router.put('/:userId', userController.updateUserProfile);
 
+// Маршрут для получения пользователей группы
+router.get('/usergroups/:groupId', userController.getGroupUsers);
+
 module.exports = router;
