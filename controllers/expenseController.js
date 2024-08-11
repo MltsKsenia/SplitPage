@@ -33,9 +33,9 @@ exports.getGroupExpenses = async (req, res) => {
 // Delete Expense
 
 exports.deleteExpense = async (req, res) => {
-    
+
     const { expenseId } = req.params;
-    
+
     try {
         await db('transactions').where('id', expenseId).del();
         res.status(200).json({ message: 'Expense deleted' });

@@ -251,19 +251,33 @@ function showExpenses(groupId) {
     document.getElementById('selectedGroupName').textContent = `Group ID: ${groupId}`;
     document.getElementById('addExpenseBtn').style.display = 'block';
     document.getElementById('deleteExpenseBtn').style.display = 'block';
-    // expenseTableBody.innerHTML = '';
 
-    // Получение и отображение расходов
-    fetch(`/api/expenses/group/${groupId}`)
-        .then(response => response.json())
+    // Получение friendId для текущей группы
+    const currentUser = localStorage.getItem('userId');
+    console.log('Current User ID:', currentUser); // Для отладки
+
+    fetch(`/api/users/usergroups/${groupId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
-            data.forEach(transaction => {
-                if (data.friendId) {
-                    document.getElementById('friendId').value = data.friendId;
+            console.log('Usergroup data:', data); // Для отладки
+
+            if (Array.isArray(data)) {
+                // Поиск friendId, который не совпадает с currentUser
+                const friend = data.find(entry => entry.id !== currentUser); // Исправлено с user_id на id
+                if (friend) {
+                    document.getElementById('friendId').value = friend.id;
+                    console.log('Found Friend ID:', friend.id); // Для отладки
                 } else {
-                    console.error('Friend ID not found');
+                    console.error('Friend ID not found or is the same as current user');
                 }
-            });
+            } else {
+                console.error('Unexpected data format for usergroups');
+            }
         })
         .catch(error => console.error('Error retrieving friend ID:', error));
 
@@ -272,24 +286,74 @@ function showExpenses(groupId) {
 
     // Получение и отображение расходов
     fetch(`/api/expenses/group/${groupId}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
-            data.forEach(transaction => {
-                const row = document.createElement('tr');
+            console.log('Expenses data:', data); // Для отладки
 
-                row.innerHTML = `
-                    <td>${transaction.description}</td>
-                    <td>${transaction.date}</td>
-                    <td>${transaction.amount}</td>
-                    <td><b style="color: ${transaction.type === 'owed' ? 'green' : 'red'};">
-                        ${transaction.type === 'owed' ? 'Owed' : 'Debt'}: ${transaction.amount}
-                    </b></td>
-                `;
-                expenseTableBody.appendChild(row);
-            });
+            if (Array.isArray(data)) {
+                data.forEach(transaction => {
+                    const row = document.createElement('tr');
+
+                    // Определение отображаемой суммы для последнего столбца
+                    let displayedAmount = '';
+                    let displayedType = '';
+
+                    // Убедитесь, что amount является числом
+                    const amount = parseFloat(transaction.amount);
+                    if (isNaN(amount)) {
+                        console.error('Invalid amount:', transaction.amount);
+                        return; // Пропустить эту транзакцию
+                    }
+
+                    switch (transaction.type) {
+                        case 'owed':
+                            if (transaction.payer_id === currentUser) {
+                                displayedAmount = amount.toFixed(2);
+                                displayedType = 'full';
+                            } else {
+                                displayedAmount = (amount / 2).toFixed(2);
+                                displayedType = 'split';
+                            }
+                            break;
+                        case 'debt':
+                            if (transaction.payer_id === currentUser) {
+                                displayedAmount = amount.toFixed(2);
+                                displayedType = 'full';
+                            } else {
+                                displayedAmount = (amount / 2).toFixed(2);
+                                displayedType = 'split';
+                            }
+                            break;
+                        default:
+                            console.error('Unexpected transaction type:', transaction.type);
+                            return; // Пропустить эту транзакцию
+                    }
+
+                    row.innerHTML = `
+                        <td><input type="checkbox" class="expense-checkbox" data-expense-id="${transaction.id}"></td>
+                        <td>${transaction.description}</td>
+                        <td>${transaction.date}</td>
+                        <td>${amount.toFixed(2)}</td>
+                        <td><b style="color: ${transaction.type === 'owed' ? 'green' : 'red'};">
+                            ${transaction.type === 'owed' ? 'Owed' : 'Debt'}:
+                        </b></td>
+                        <td><b style="color: ${transaction.type === 'owed' ? 'green' : 'red'};">
+                            ${displayedAmount}
+                        </b></td>`;
+                    expenseTableBody.appendChild(row);
+                });
+            } else {
+                console.error('Unexpected data format for expenses');
+            }
         })
         .catch(error => console.error('Error retrieving expenses:', error));
 }
+
 
 function showAddExpenseModal() {
     document.getElementById('add-expense-modal').style.display = 'flex';
@@ -304,7 +368,7 @@ async function addExpense(group_id, description, amount, date, payer_id, receive
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': `Bearer ${localStorage.getItem('token')} `
             },
             body: JSON.stringify({ group_id, description, amount, date, payer_id, receiver_id, type })
         });
@@ -367,7 +431,7 @@ async function addExpenseHandler(paidBy, splitType) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': `Bearer ${localStorage.getItem('token')} `
             },
             body: JSON.stringify({ group_id, description: expenseName, amount, date, payer_id: paidBy === 'you' ? currentUser : friendId, receiver_id: paidBy === 'you' ? friendId : currentUser, type: shares[0].type })
         });
@@ -403,7 +467,7 @@ function addExpenseToTable(expense) {
     const owedOrDebtCell = document.createElement('td');
     const amountColor = expense.type === 'owed' ? 'green' : 'red';
     const amountLabel = expense.type === 'owed' ? 'Owed' : 'Debt';
-    owedOrDebtCell.innerHTML = `<b style="color: ${amountColor};">${amountLabel}: ${expense.amount}</b>`;
+    owedOrDebtCell.innerHTML = `< b style = "color: ${amountColor};" > ${amountLabel}: ${expense.amount}</b > `;
     row.appendChild(owedOrDebtCell);
 
     const totalCreditCell = document.createElement('td');
@@ -413,75 +477,36 @@ function addExpenseToTable(expense) {
     expenseTableBody.appendChild(row);
 }
 
-//Удаление расхода
-// document.getElementById('deleteExpenseBtn').addEventListener('click', enableDeleteExpenses);
+// Функция для удаления выбранного расхода
+async function deleteSelectedExpense() {
+    if (!selectedExpenseId) {
+        alert('Please select an expense to delete.');
+        return;
+    }
 
-// function enableDeleteExpenses() {
-//     const expenseItems = document.querySelectorAll('#expenseList li');
-//     expenseItems.forEach(expenseItem => {
-//         expenseItem.style.backgroundColor = '#6dac95';
+    try {
+        const response = await fetch(`/api/expenses/${selectedExpenseId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+            }
+        });
 
-//         expenseItem.addEventListener('click', () => {
-//             expenseItem.remove();
-//         });
+        if (response.ok) {
+            alert('Expense deleted successfully!');
+            showExpenses(document.getElementById('groupId').value); // Обновляем список расходов
+            selectedExpenseId = null;
+            document.getElementById('deleteExpenseBtn').disabled = true;
+        } else {
+            const data = await response.json();
+            alert(data.message || 'Failed to delete expense.');
+        }
+    } catch (error) {
+        console.error('Error deleting expense:', error);
+        alert('An error occurred. Please try again later.');
+    }
+}
 
-//         expenseItem.addEventListener('mouseover', () => {
-//             expenseItem.style.backgroundColor = '#095b4d';
-//             expenseItem.style.cursor = 'pointer';
-//         });
-
-//         expenseItem.addEventListener('mouseout', () => {
-//             expenseItem.style.backgroundColor = '#6dac95';
-//             expenseItem.style.cursor = 'pointer';
-//         });
-
-//         expenseItem.addEventListener('mousedown', () => {
-//             expenseItem.style.backgroundColor = '#6dac95';
-//             expenseItem.style.cursor = 'pointer';
-
-//         });
-
-//         expenseItem.addEventListener('mouseup', () => {
-//             expenseItem.style.backgroundColor = '#095b4d';
-//             expenseItem.style.cursor = 'pointer';
-//         });
-//     });
-
-//         const data = await response.json();
-//         if (response.ok) {
-//             alert('Expense added successfully!');
-//             window.location.reload();
-//         } else {
-//             alert(data.message);
-//         }
-//     } catch (error) {
-//         console.error('Error:', error);
-//     }
-// }
-
-// function addExpenseHandler() {
-//     const expenseName = document.getElementById('expenseName').value;
-//     const amount = document.getElementById('amount').value;
-//     const date = document.getElementById('expenseDate').value;
-//     const paid_by = document.getElementById('paidBy').value;
-//     const group_id = document.getElementById('groupId').value;
-//     const shares = document.getElementById('shares').value.split('/').map(share => share.trim());
-
-//     if (expenseName && amount && date && paid_by && group_id && shares.length > 0) {
-//         const expenseList = document.getElementById('expenseList');
-//         const expenseItem = document.createElement('li');
-//         expenseItem.textContent = `${expenseName} (${amount})`;
-//         expenseList.appendChild(expenseItem);
-//         document.getElementById('expenseName').value = '';
-//         document.getElementById('amount').value = '';
-//         document.getElementById('expenseDate').value = '';
-//         document.getElementById('paidBy').value = '';
-//         document.getElementById('groupId').value = '';
-//         document.getElementById('shares').value = '';
-//         hideCreateModal();
-
-//         // Вызов асинхронной функции
-//         addExpense(group_id, expenseName, amount, date, paid_by, shares);
-//     } else {
-//         alert('Please enter all required fields.');
-//     }
+// Обработчик кнопки удаления расхода
+document.getElementById('deleteExpenseBtn').addEventListener('click', deleteSelectedExpense);
