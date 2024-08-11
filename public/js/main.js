@@ -350,6 +350,10 @@ function showExpenses(groupId) {
             } else {
                 console.error('Unexpected data format for expenses');
             }
+      
+            document.querySelectorAll('.expense-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', handleExpenseSelection);
+            });
         })
         .catch(error => console.error('Error retrieving expenses:', error));
 }
@@ -476,6 +480,21 @@ function addExpenseToTable(expense) {
 
     expenseTableBody.appendChild(row);
 }
+
+
+let selectedExpenseId = null;
+
+function handleExpenseSelection(event) {
+    const checkbox = event.target;
+
+    if (checkbox.checked) {
+        selectedExpenseId = checkbox.getAttribute('data-expense-id');
+        document.getElementById('deleteExpenseBtn').disabled = false;
+    } else {
+        selectedExpenseId = null;
+        document.getElementById('deleteExpenseBtn').disabled = true;
+    }
+};
 
 // Функция для удаления выбранного расхода
 async function deleteSelectedExpense() {
