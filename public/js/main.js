@@ -278,6 +278,7 @@ function showExpenses(groupId) {
                 const row = document.createElement('tr');
 
                 row.innerHTML = `
+                    <td><input type="checkbox" class="expense-checkbox" data-expense-id="${transaction.id}"></td>
                     <td>${transaction.description}</td>
                     <td>${transaction.date}</td>
                     <td>${transaction.amount}</td>
@@ -286,6 +287,9 @@ function showExpenses(groupId) {
                     </b></td>
                 `;
                 expenseTableBody.appendChild(row);
+            });
+            document.querySelectorAll('.expense-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', handleExpenseSelection);
             });
         })
         .catch(error => console.error('Error retrieving expenses:', error));
@@ -413,75 +417,50 @@ function addExpenseToTable(expense) {
     expenseTableBody.appendChild(row);
 }
 
-//Удаление расхода
-// document.getElementById('deleteExpenseBtn').addEventListener('click', enableDeleteExpenses);
+let selectedExpenseId = null;
 
-// function enableDeleteExpenses() {
-//     const expenseItems = document.querySelectorAll('#expenseList li');
-//     expenseItems.forEach(expenseItem => {
-//         expenseItem.style.backgroundColor = '#6dac95';
+function handleExpenseSelection(event) {
+    const checkbox = event.target;
 
-//         expenseItem.addEventListener('click', () => {
-//             expenseItem.remove();
-//         });
+    if (checkbox.checked) {
+        selectedExpenseId = checkbox.getAttribute('data-expense-id');
+        document.getElementById('deleteExpenseBtn').disabled = false;
+    } else {
+        selectedExpenseId = null;
+        document.getElementById('deleteExpenseBtn').disabled = true;
+    }
+};
 
-//         expenseItem.addEventListener('mouseover', () => {
-//             expenseItem.style.backgroundColor = '#095b4d';
-//             expenseItem.style.cursor = 'pointer';
-//         });
+// Функция для удаления выбранного расхода
+async function deleteSelectedExpense() {
+    if (!selectedExpenseId) {
+        alert('Please select an expense to delete.');
+        return;
+    }
 
-//         expenseItem.addEventListener('mouseout', () => {
-//             expenseItem.style.backgroundColor = '#6dac95';
-//             expenseItem.style.cursor = 'pointer';
-//         });
+    try {
+        const response = await fetch(`/api/expenses/${selectedExpenseId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+            }
+        });
 
-//         expenseItem.addEventListener('mousedown', () => {
-//             expenseItem.style.backgroundColor = '#6dac95';
-//             expenseItem.style.cursor = 'pointer';
+        if (response.ok) {
+            alert('Expense deleted successfully!');
+            showExpenses(document.getElementById('groupId').value); // Обновляем список расходов
+            selectedExpenseId = null;
+            document.getElementById('deleteExpenseBtn').disabled = true;
+        } else {
+            const data = await response.json();
+            alert(data.message || 'Failed to delete expense.');
+        }
+    } catch (error) {
+        console.error('Error deleting expense:', error);
+        alert('An error occurred. Please try again later.');
+    }
+}
 
-//         });
-
-//         expenseItem.addEventListener('mouseup', () => {
-//             expenseItem.style.backgroundColor = '#095b4d';
-//             expenseItem.style.cursor = 'pointer';
-//         });
-//     });
-
-//         const data = await response.json();
-//         if (response.ok) {
-//             alert('Expense added successfully!');
-//             window.location.reload();
-//         } else {
-//             alert(data.message);
-//         }
-//     } catch (error) {
-//         console.error('Error:', error);
-//     }
-// }
-
-// function addExpenseHandler() {
-//     const expenseName = document.getElementById('expenseName').value;
-//     const amount = document.getElementById('amount').value;
-//     const date = document.getElementById('expenseDate').value;
-//     const paid_by = document.getElementById('paidBy').value;
-//     const group_id = document.getElementById('groupId').value;
-//     const shares = document.getElementById('shares').value.split('/').map(share => share.trim());
-
-//     if (expenseName && amount && date && paid_by && group_id && shares.length > 0) {
-//         const expenseList = document.getElementById('expenseList');
-//         const expenseItem = document.createElement('li');
-//         expenseItem.textContent = `${expenseName} (${amount})`;
-//         expenseList.appendChild(expenseItem);
-//         document.getElementById('expenseName').value = '';
-//         document.getElementById('amount').value = '';
-//         document.getElementById('expenseDate').value = '';
-//         document.getElementById('paidBy').value = '';
-//         document.getElementById('groupId').value = '';
-//         document.getElementById('shares').value = '';
-//         hideCreateModal();
-
-//         // Вызов асинхронной функции
-//         addExpense(group_id, expenseName, amount, date, paid_by, shares);
-//     } else {
-//         alert('Please enter all required fields.');
-//     }
+// Обработчик кнопки удаления расхода
+document.getElementById('deleteExpenseBtn').addEventListener('click', deleteSelectedExpense);
